@@ -1,0 +1,36 @@
+{% extends "application/layout.html" %}
+{% block title %}
+    Tickets
+{% endblock %}
+{% block content %}
+    <h2>Logged tickets</h2>
+
+    {% if ticket_list %}
+        <table class="tickets_list">
+            <thead>
+            <tr>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Title</th>
+                <th>Severity</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for ticket in ticket_list %}
+                <tr>
+                    <td>{{ ticket.created | date:'d M Y' }}</td>
+                    <td>{{ ticket.created | time:'H:i:s' }}</td>
+                    <td>
+                        {{ ticket.title }}
+                    </td>
+                    <td>
+                        {{ ticket.severity }}
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No tickets have been logged. Use the <a href="{% url 'ticket-form' %}">Create Ticket form</a>.</p>
+    {% endif %}
+{% endblock %}%}
