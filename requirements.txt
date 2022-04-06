@@ -1,4 +1,5 @@
-django
+django~=3.2.12
 gunicorn
 django-heroku
 whitenoise
+dj_database_url
