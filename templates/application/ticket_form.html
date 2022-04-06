@@ -1,0 +1,11 @@
+{% extends "application/layout.html" %}
+{% block title %}
+    Create a ticket
+{% endblock %}
+{% block content %}
+    <form method="POST" class="ticket-form">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="save btn btn-default">Create</button>
+    </form>
+{% endblock %}
