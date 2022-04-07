@@ -1,3 +1,10 @@
+<!---
+References:
+    Based on the 'Create a base page template and styles' section of the django tutorial:
+
+    Visual Studio Code (no date) [online] Python and Django tutorial in Visual Studio Code. Available at:
+    https://code.visualstudio.com/docs/python/tutorial-django (Accessed: 13 April 2022).
+--->
 <!DOCTYPE html>
 <html>
 <head>
@@ -5,24 +12,27 @@
     <title>{% block title %}{% endblock %}</title>
     {% load static %}
     <link rel="stylesheet" type="text/css" href="{% static 'application/site.css' %}"/>
+    {% include 'application/messages.html' %}
 </head>
 
 <body>
 <div class="navbar">
-    <a href="{% url 'tickets' %}" class="navbar-brand">Tickets</a>
-    <a href="{% url 'ticket-form' %}" class="navbar-item">Create Ticket</a>
-    <a href="{% url 'login' %}" class="navbar-item" {% if request.user.is_authenticated %}style="display: none" {% else %}style="display: inline"{% endif %}>Login</a>
-    <a href="{% url 'register' %}" class="navbar-item" {% if request.user.is_authenticated %}style="display: none" {% else %}style="display: inline"{% endif %}>Register</a>
-    <a href="{% url 'logout' %}" class="navbar-item" {% if not request.user.is_authenticated %}style="display: none" {% else %}style="display: inline"{% endif %}>Logout</a>
-
-
-
+    <a href="{% url 'home' %}" class="navbar-brand">Home</a>
+    <a href="{% url 'tickets' %}" class="navbar-item">Tickets</a>
+    <a href="{% url 'user_tickets' %}" class="navbar-item">User Tickets</a>
+    <a href="{% url 'set_on_call' %}" class="navbar-item">Set On Call</a>
+    <a href="{% url 'ticket_form' %}" class="navbar-item">Create Ticket</a>
+    <a href="{% url 'login' %}" class="navbar-item" {% if request.user.is_authenticated %}style="display: none"
+       {% else %}style="display: inline"{% endif %}>Login</a>
+    <a href="{% url 'register' %}" class="navbar-item" {% if request.user.is_authenticated %}style="display: none"
+       {% else %}style="display: inline"{% endif %}>Register</a>
+    <a href="{% url 'logout' %}" class="navbar-item" {% if not request.user.is_authenticated %}style="display: none"
+       {% else %}style="display: inline"{% endif %}>Logout</a>
 </div>
 
 <div class="body-content">
     {% block content %}
     {% endblock %}
-    <hr/>
     <footer>
         <p>© 2022</p>
     </footer>

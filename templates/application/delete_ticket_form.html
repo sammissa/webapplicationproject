@@ -1,0 +1,17 @@
+<!---
+References:
+    delete_ticket_form based on template in Django documentation:
+
+    Django (no date) [online] Generic editing views | Django documentation. Available at:
+    https://docs.djangoproject.com/en/4.0/ref/class-based-views/generic-editing/#django.views.generic.edit.DeleteView
+    (Accessed: 20 April 2022).
+--->
+{% extends "application/layout.html" %}
+{% block content %}
+    <h2>Delete Ticket</h2>
+    <form method="POST">
+        {% csrf_token %}
+        <p>Are you sure you want to delete Ticket: {{ object.title }} ?</p>
+        <input type="submit" value="Confirm">
+    </form>
+{% endblock %}

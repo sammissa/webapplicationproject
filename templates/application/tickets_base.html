@@ -1,0 +1,49 @@
+<!---
+References:
+    Template based on home.html in 'Use the debugger with page templates' section of Django Tutorial:
+
+    Visual Studio Code (no date) [online] Python and Django tutorial in Visual Studio Code. Available at:
+    https://code.visualstudio.com/docs/python/tutorial-django (Accessed: 13 April 2022).
+
+    edit_ticket_request url based on section 4 in:
+
+    Dev 2 Qa (2019) [online] ‘How To Pass Parameters To View Via Url In Django’. Available at:
+    https://www.dev2qa.com/how-to-pass-parameters-to-view-via-url-in-django/ (Accessed: 19 April 2022).
+--->
+{% if ticket_list %}
+    <table class="ticket_list">
+        <thead>
+        <tr>
+            <th>Date</th>
+            <th>Time</th>
+            <th>Title</th>
+            <th>Priority</th>
+            <th>Description</th>
+            <th>Status</th>
+            <th>Reporter</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for ticket in ticket_list %}
+            <tr>
+                <td>{{ ticket.created | date:'d M Y' }}</td>
+                <td>{{ ticket.created | time:'H:i:s' }}</td>
+                <td>{{ ticket.title }}</td>
+                <td>{{ ticket.priority }}</td>
+                <td>{{ ticket.description }}</td>
+                <td>{{ ticket.status }}</td>
+                <td>{{ ticket.reporter.name }}</td>
+                <td>
+                    <a href="{% url 'edit_ticket' pk=ticket.id %}">Edit</a>
+                    {% if request.user.is_superuser %}
+                        <a href="{% url 'delete_ticket' pk=ticket.id %}">Delete</a>
+                    {% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% else %}
+    <p>No tickets have been created. Use the <a href="{% url 'ticket_form' %}">Create Ticket form</a>.</p>
+{% endif %}

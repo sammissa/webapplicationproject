@@ -1,0 +1,16 @@
+<!---
+References:
+    messages.html taken from 'displaying messages' section of django documentation:
+
+    Django (2022) [online] ‘Django Documentation’, p. 998. Available at:
+    https://buildmedia.readthedocs.org/media/pdf/django/4.0.x/django.pdf (Accessed: 13 April 2022).
+--->
+{% if messages %}
+<ul class="messages">
+    {% for message in messages %}
+    <li {% if message.tags %} class="{{ message.tags }}"{% endif %}>
+        {{ message }}
+    </li>
+    {% endfor %}
+</ul>
+{% endif %}
