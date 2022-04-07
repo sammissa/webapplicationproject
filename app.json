@@ -5,9 +5,7 @@
   "repository": "https://github.com/sammissa/webapplicationproject/",
   "keywords": ["python", "django" ],
   "addons": [ "heroku-postgresql" ],
-  "env": {
-    "SECRET_KEY": "${{ secrets.SECRET_KEY }}"
-  },
+  "env": "SECRET_KEY": "${{ secrets.SECRET_KEY }}",
   "environments": {
     "test": {
       "scripts": {
