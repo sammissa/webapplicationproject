@@ -1,17 +1,17 @@
+<!---
+References:
+    Based on the 'Create a register.html file' section of:
+
+    Ordinary Coders (2020) [online] A Guide to User Registration, Login, and Logout in Django. Available at:
+    https://ordinarycoders.com/blog/article/django-user-register-login-logout (Accessed: 13 April 2022).
+--->
 {% extends "application/layout.html" %}
-
-{% block content %} 
-
-
-<!--Register--> 
-<div class="container py-5">
-	<h1>Register</h1>
-	<form method="POST">
-		{% csrf_token %}
-		{{ register_form }}
-		<button class="btn btn-primary" type="submit">Register</button>
-	</form>
-	<p class="text-center">If you already have an account, <a href="/login">login</a> instead.</p>
-</div>
-
+{% load crispy_forms_tags %}
+{% block content %}
+    <div class="container py-5">
+        <h2>Register</h2>
+        {% csrf_token %}
+        {% crispy register_form register_form.helper %}
+        <p class="text-center">If you already have an account, <a href="/login">login</a> instead.</p>
+    </div>
 {% endblock %}

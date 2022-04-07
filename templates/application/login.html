@@ -1,17 +1,19 @@
+<!---
+References:
+    login.html based on the 'Create a login.html file' section of:
+
+    Ordinary Coders (2020) [online] A Guide to User Registration, Login, and Logout in Django. Available at:
+    https://ordinarycoders.com/blog/article/django-user-register-login-logout (Accessed: 13 April 2022).
+--->
 {% extends "application/layout.html" %}
-
-{% block content %}      
-
-
-<!--Login--> 
-<div class="container py-5">
-  <h1>Login</h1>
-  <form method="POST">
-    {% csrf_token %}
-    {{ login_form }}
-    <button class="btn btn-primary" type="submit">Login</button>
-  </form>
-  <p class="text-center">Don't have an account? <a href="/register">Create an account</a>.</p>
-</div>
-
+{% block content %}
+    <div class="container py-5">
+        <h2>Login</h2>
+        <form method="POST">
+            {% csrf_token %}
+            {{login_form }}
+            <button class="btn btn-primary" type="submit">Login</button>
+        </form>
+        <p class="text-center">Don't have an account? <a href="/register">Create an account</a>.</p>
+    </div>
 {% endblock %}

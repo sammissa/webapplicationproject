@@ -1,16 +1,16 @@
 <!---
 References:
-    ticket_form.html based on 'log_message.html' file of the 'define models' section of Django tutorial:
+    set_on_call.html based on 'log_message.html' file of the 'define models' section of Django tutorial:
 
     Visual Studio Code (no date) [online] Python and Django tutorial in Visual Studio Code. Available at:
     https://code.visualstudio.com/docs/python/tutorial-django (Accessed: 13 April 2022).
 --->
 {% extends "application/layout.html" %}
 {% block content %}
-    <h2>Create Ticket</h2>
-    <form method="POST" class="ticket_form">
+    <h2>Set On Call</h2>
+    <form method="POST" class="set_on_call">
         {% csrf_token %}
-        {{ ticket_form.as_p }}
-        <button type="submit" class="save btn btn-default">Create</button>
+        {{ set_on_call.as_p }}
+        <button type="submit" class="save btn btn-default">Set</button>
     </form>
 {% endblock %}
