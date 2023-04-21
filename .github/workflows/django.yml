@@ -8,7 +8,7 @@ on:
 
 jobs:
   build:
-    environment: fierce-refuge-23993
+    environment: [ fierce-refuge-23993, aws ]
     env: 
       SECRET_KEY: ${{ secrets.SECRET_KEY }}
     runs-on: ubuntu-latest
