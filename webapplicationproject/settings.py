@@ -75,15 +75,16 @@ WSGI_APPLICATION = 'webapplicationproject.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
-db_from_env = dj_database_url.config(conn_max_age=600)
-DATABASES = {
-    "default": {
-        "ENGINE" : "django.db.backends.sqlite3",
-        "NAME": os.path.join(BASE_DIR, "db.sqlite3")
+DATABASES = {}
+if 'DATABASE_URL' in os.environ:
+    db_from_env = dj_database_url.config(conn_max_age=600)
+    DATABASES['default'] = db_from_env
+else:
+    # Configure your default database settings here
+    DATABASES['default'] = {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
-}
-
-DATABASES['default'].update(db_from_env)
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'

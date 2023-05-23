@@ -26,6 +26,8 @@ from crispy_forms.layout import Submit
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
+from django.core.validators import MinLengthValidator, MaxLengthValidator, EmailValidator
+from django.utils.html import escape
 
 from application.models import Engineer, Ticket
 
@@ -34,6 +36,12 @@ class CreateTicketForm(forms.ModelForm):
     class Meta:
         model = Ticket
         fields = ("title", "priority", "description", "status")
+
+    def clean_title(self):
+        return clean_field(self, field_name="title")
+
+    def clean_description(self):
+        return clean_field(self, field_name="description")
 
 
 class EditTicketForm(forms.ModelForm):
@@ -44,11 +52,31 @@ class EditTicketForm(forms.ModelForm):
         model = Ticket
         fields = ("title", "created", "priority", "description", "status")
 
+    def clean_description(self):
+        return clean_field(self, field_name="description")
+
 
 class RegisterForm(UserCreationForm):
-    first_name = forms.CharField(required=True)
-    last_name = forms.CharField(required=True)
-    email = forms.EmailField(required=True)
+    first_name = forms.CharField(
+        required=True,
+        validators=[
+            MinLengthValidator(2),
+            MaxLengthValidator(50)
+        ]
+    )
+    last_name = forms.CharField(
+        required=True,
+        validators=[
+            MinLengthValidator(2),
+            MaxLengthValidator(50)
+        ]
+    )
+    email = forms.EmailField(
+        required=True,
+        validators=[
+            EmailValidator()
+        ]
+    )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -61,9 +89,17 @@ class RegisterForm(UserCreationForm):
         model = User
         fields = ("first_name", "last_name", "username", "email", "password1", "password2", "is_superuser")
 
+    def clean_first_name(self):
+        return clean_field(self, field_name="first_name")
+
+    def clean_last_name(self):
+        return clean_field(self, field_name="last_name")
+
+    def clean_email(self):
+        return clean_field(self, field_name="email")
+
     def save(self, commit=True):
         user = super(RegisterForm, self).save(commit=False)
-        user.email = self.cleaned_data['email']
         engineer = Engineer()
         engineer.name = user.get_full_name()
         if commit:
@@ -75,3 +111,14 @@ class RegisterForm(UserCreationForm):
 class SetOnCallForm(forms.Form):
     engineer = forms.ModelChoiceField(
         label="Engineer Choices", queryset=Engineer.objects.all(), required=True)
+
+
+def clean_field(self, field_name):
+    field_value = self.cleaned_data.get(field_name)
+    if field_value and '<script>' in field_value:
+        self.add_error(field_name, f'Invalid {field_name.replace("_", " ")}')
+
+    # Perform HTML escaping on the field value
+    field_value = escape(field_value)
+
+    return field_value

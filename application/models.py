@@ -25,14 +25,14 @@ class Engineer(models.Model):
 
 class Ticket(models.Model):
     class Priority(models.TextChoices):
-        LOW = 'L', 'Low'
-        MED = 'M', 'Medium'
-        HIGH = 'H', 'High'
+        LOW = 'L', _('Low')
+        MED = 'M', _('Medium')
+        HIGH = 'H', _('High')
 
     class Status(models.TextChoices):
-        TD = 'TD', 'To do'
-        IP = 'IP', 'In progress'
-        D = 'D', 'Done'
+        TD = 'TD', _('To do')
+        IP = 'IP', _('In progress')
+        D = 'D', _('Done')
 
     title = models.CharField(
         _('ticket title'),
