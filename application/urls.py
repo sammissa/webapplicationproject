@@ -11,7 +11,6 @@ References:
     Dev 2 Qa (2019) [online] ‘How To Pass Parameters To View Via Url In Django’. Available at:
     https://www.dev2qa.com/how-to-pass-parameters-to-view-via-url-in-django/ (Accessed: 19 April 2022).
 """
-from django.conf.urls import url
 from django.urls import path
 
 from application import views
@@ -21,10 +20,10 @@ user_ticket_list_view = views.TicketListView.as_view(template_name="application/
 delete_ticket_list_view = views.TicketDeleteView.as_view(template_name="application/delete_ticket_form.html")
 
 urlpatterns = [
-    url(r'^tickets/update/(?P<pk>\d)/$', views.edit_ticket_request, name="edit_ticket"),
-    url(r'^tickets/delete/(?P<pk>\d)/$', delete_ticket_list_view, name="delete_ticket"),
     path("", views.home_request, name="home"),
     path("tickets/", ticket_list_view, name="tickets"),
+    path('tickets/update/<int:pk>/', views.edit_ticket_request, name="edit_ticket"),
+    path('tickets/delete/<int:pk>/', delete_ticket_list_view, name="delete_ticket"),
     path("user_tickets/", user_ticket_list_view, name="user_tickets"),
     path("set_on_call/", views.set_on_call_request, name="set_on_call"),
     path("ticket_form/", views.create_ticket_request, name="ticket_form"),
