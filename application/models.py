@@ -39,7 +39,7 @@ class Ticket(models.Model):
         help_text=_(
             'Meaningful title of the ticket'
         ),
-        max_length=300,
+        max_length=100,
         unique=True,
     )
     created = models.DateTimeField('date created')
@@ -52,13 +52,13 @@ class Ticket(models.Model):
         ),
         max_length=50
     )
-    description = models.CharField(
+    description = models.TextField(
         _('ticket description'),
         default='',
         help_text=_(
             'Describes the issue and any action items an on-call engineer has reported'
         ),
-        max_length=300
+        max_length=1000
     )
     status = models.CharField(
         _('ticket status'),

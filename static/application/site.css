@@ -6,19 +6,20 @@ References:
     https://code.visualstudio.com/docs/python/tutorial-django (Accessed: 13 April 2022).
  */
 .messages {
-    background-color: black;
+    background-color: #333333;
+    color: white;
     text-align: center;
 }
 
 .navbar {
-    background-color: cadetblue;
+    background-color: #fd9752;
+    color: white;
 }
 
 .navbar, .messages {
     font-size: 1em;
     font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
-    color: white;
-    padding: 8px 5px 8px 5px;
+    padding: 8px 5px;
 }
 
 .navbar a {
@@ -39,13 +40,46 @@ References:
 .body-content {
     padding: 5px;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f5f5f5;
 }
 
 input[name=message] {
     width: 80%;
 }
 
-.ticket_list th, td {
+.ticket_list {
+    table-layout: fixed;
+    width: 100%;
+    white-space: normal;
+    word-break: break-word;
+    border-collapse: collapse;
+}
+
+.ticket_list th,
+.ticket_list td {
+    border: 1px solid #dddddd;
+    padding: 8px;
+}
+
+.align_center {
+    text-align: center;
+}
+
+.align_left {
     text-align: left;
-    padding-right: 15px;
+}
+
+input[name="title"] {
+    width: 100ch;
+    box-sizing: border-box;
+}
+
+textarea[name="description"] {
+    vertical-align: top;
+    text-align: left;
+    resize: vertical;
+    height: auto;
+    min-height: 100px;
+    max-height: 500px;
+    background-color: #ffffff;
 }

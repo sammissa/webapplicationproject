@@ -27,14 +27,14 @@ References:
         <tbody>
         {% for ticket in ticket_list %}
             <tr>
-                <td>{{ ticket.created | date:'d M Y' }}</td>
-                <td>{{ ticket.created | time:'H:i:s' }}</td>
-                <td>{{ ticket.title }}</td>
-                <td>{{ ticket.priority }}</td>
-                <td>{{ ticket.description }}</td>
-                <td>{{ ticket.status }}</td>
-                <td>{{ ticket.reporter.name }}</td>
-                <td>
+                <td class="align_center">{{ ticket.created | date:'d M Y' }}</td>
+                <td class="align_center">{{ ticket.created | time:'H:i:s' }}</td>
+                <td class="align_left">{{ ticket.title }}</td>
+                <td class="align_center">{{ ticket.priority }}</td>
+                <td class="align_left">{{ ticket.description }}</td>
+                <td class="align_center">{{ ticket.status }}</td>
+                <td class="align_center">{{ ticket.reporter.name }}</td>
+                <td class="align_center">
                     <a href="{% url 'edit_ticket' pk=ticket.id %}">Edit</a>
                     {% if request.user.is_superuser %}
                         <a href="{% url 'delete_ticket' pk=ticket.id %}">Delete</a>

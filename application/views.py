@@ -125,8 +125,8 @@ def edit_ticket_request(request, pk):
     try:
         instance = Ticket.objects.get(pk=pk)
     except Ticket.DoesNotExist:
-        instance = None
         messages.error(request, "Ticket does not exist.")
+        return render(request=request, template_name="application/tickets.html")
     form = EditTicketForm(data=request.POST or None, instance=instance)
     if request.method == "POST":
         if form.is_valid():
