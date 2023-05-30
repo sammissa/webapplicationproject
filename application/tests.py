@@ -45,14 +45,7 @@ USERNAME = "testuser"
 PASSWORD = "123Password789!"
 
 
-class TeardownTestCase(TestCase):
-    def tearDown(self):
-        Ticket.objects.all().delete()
-        Engineer.objects.all().delete()
-        User.objects.all().delete()
-
-
-class CreateTicketFormTestCase(TeardownTestCase):
+class CreateTicketFormTestCase(TestCase):
     def test_empty_form_is_not_valid(self):
         form = CreateTicketForm()
 
@@ -133,7 +126,7 @@ class CreateTicketFormTestCase(TeardownTestCase):
         self.assertEqual(form.errors['description'][0], expected_error_message)
 
 
-class EditTicketFormTestCase(TeardownTestCase):
+class EditTicketFormTestCase(TestCase):
     def setUp(self):
         self.engineer = Engineer.objects.create(name="reporter", is_on_call=True)
         self.ticket = Ticket.objects.create(title=TICKET_TITLE,
@@ -171,7 +164,7 @@ class EditTicketFormTestCase(TeardownTestCase):
         self.assertEqual(form.errors['description'][0], expected_error_message)
 
 
-class RegisterFormTestCase(TeardownTestCase):
+class RegisterFormTestCase(TestCase):
     def test_empty_form_is_not_valid(self):
         form = RegisterForm()
 
@@ -308,7 +301,7 @@ class RegisterFormTestCase(TeardownTestCase):
         self.assertEqual(form.errors['last_name'][0], expected_error_message)
 
 
-class SetOnCallFormTestCase(TeardownTestCase):
+class SetOnCallFormTestCase(TestCase):
     def setUp(self):
         Engineer.objects.create(name="test", is_on_call=False)
 
@@ -328,7 +321,7 @@ class SetOnCallFormTestCase(TeardownTestCase):
         self.assertTrue(form.is_valid())
 
 
-class EngineerTestCase(TeardownTestCase):
+class EngineerTestCase(TestCase):
     def setUp(self):
         Engineer.objects.create(name="first", is_on_call=True)
         Engineer.objects.create(name="second", is_on_call=False)
@@ -343,7 +336,7 @@ class EngineerTestCase(TeardownTestCase):
         self.assertEqual(second.is_on_call, False)
 
 
-class TicketTestCase(TeardownTestCase):
+class TicketTestCase(TestCase):
     def test_ticket(self):
         engineer = Engineer.objects.create(name="reporter", is_on_call=True)
         ticket = Ticket.objects.create(title=TICKET_TITLE,
@@ -362,7 +355,7 @@ class TicketTestCase(TeardownTestCase):
         self.assertEqual(ticket.reporter.is_on_call, True)
 
 
-class ViewsTestCase(TeardownTestCase):
+class ViewsTestCase(TestCase):
     def setUp(self):
         self.admin_first_name = "Admin First Name"
         self.admin_last_name = "Admin Last Name"
