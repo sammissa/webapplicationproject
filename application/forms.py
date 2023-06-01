@@ -36,11 +36,14 @@ class CreateTicketForm(forms.ModelForm):
         model = Ticket
         fields = ("title", "priority", "description", "status")
 
-    def clean_title(self):
-        return clean_field(self, field_name="title")
+    def clean(self):
+        cleaned_data = super().clean()
+        cleaned_title = clean_field(self, cleaned_data, "title")
+        cleaned_description = clean_field(self, cleaned_data, "description")
+        cleaned_data["title"] = cleaned_title
+        cleaned_data["description"] = cleaned_description
 
-    def clean_description(self):
-        return clean_field(self, field_name="description")
+        return cleaned_data
 
 
 class EditTicketForm(forms.ModelForm):
@@ -52,10 +55,11 @@ class EditTicketForm(forms.ModelForm):
         fields = ("title", "created", "priority", "description", "status")
 
     def clean(self):
-        return super().clean()
+        cleaned_data = super().clean()
+        cleaned_description = clean_field(self, cleaned_data, "description")
+        cleaned_data["description"] = cleaned_description
 
-    def clean_description(self):
-        return clean_field(self, field_name="description")
+        return cleaned_data
 
 
 class RegisterForm(UserCreationForm):
@@ -91,14 +95,16 @@ class RegisterForm(UserCreationForm):
         model = EngineerUser
         fields = ("first_name", "last_name", "username", "email", "password1", "password2")
 
-    def clean_first_name(self):
-        return clean_field(self, field_name="first_name")
+    def clean(self):
+        cleaned_data = super().clean()
+        cleaned_first_name = clean_field(self, cleaned_data, "first_name")
+        cleaned_last_name = clean_field(self, cleaned_data, "last_name")
+        cleaned_email = clean_field(self, cleaned_data, "email")
+        cleaned_data["first_name"] = cleaned_first_name
+        cleaned_data["last_name"] = cleaned_last_name
+        cleaned_data["email"] = cleaned_email
 
-    def clean_last_name(self):
-        return clean_field(self, field_name="last_name")
-
-    def clean_email(self):
-        return clean_field(self, field_name="email")
+        return cleaned_data
 
 
 class SetOnCallForm(forms.Form):
@@ -106,12 +112,12 @@ class SetOnCallForm(forms.Form):
         label="Engineer Choices", queryset=EngineerUser.objects.all(), required=True)
 
 
-def clean_field(self, field_name):
-    field_value = self.cleaned_data.get(field_name)
-    if field_value and '<script>' in field_value:
+def clean_field(self, cleaned_data, field_name):
+    field_data = cleaned_data.get(field_name)
+    if field_data and '<script>' in field_data:
         self.add_error(field_name, f'Invalid {field_name.replace("_", " ")}')
 
     # Perform HTML escaping on the field value
-    field_value = escape(field_value)
+    field_data = escape(field_data)
 
-    return field_value
+    return field_data
