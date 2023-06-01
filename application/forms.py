@@ -38,8 +38,8 @@ class CreateTicketForm(forms.ModelForm):
 
     def clean(self):
         cleaned_data = super().clean()
-        cleaned_title = clean_field(self, cleaned_data, "title")
-        cleaned_description = clean_field(self, cleaned_data, "description")
+        cleaned_title = clean_field(self, "title")
+        cleaned_description = clean_field(self, "description")
         cleaned_data["title"] = cleaned_title
         cleaned_data["description"] = cleaned_description
 
@@ -56,7 +56,7 @@ class EditTicketForm(forms.ModelForm):
 
     def clean(self):
         cleaned_data = super().clean()
-        cleaned_description = clean_field(self, cleaned_data, "description")
+        cleaned_description = clean_field(self, "description")
         cleaned_data["description"] = cleaned_description
 
         return cleaned_data
@@ -97,9 +97,9 @@ class RegisterForm(UserCreationForm):
 
     def clean(self):
         cleaned_data = super().clean()
-        cleaned_first_name = clean_field(self, cleaned_data, "first_name")
-        cleaned_last_name = clean_field(self, cleaned_data, "last_name")
-        cleaned_email = clean_field(self, cleaned_data, "email")
+        cleaned_first_name = clean_field(self, "first_name")
+        cleaned_last_name = clean_field(self, "last_name")
+        cleaned_email = clean_field(self, "email")
         cleaned_data["first_name"] = cleaned_first_name
         cleaned_data["last_name"] = cleaned_last_name
         cleaned_data["email"] = cleaned_email
@@ -112,8 +112,8 @@ class SetOnCallForm(forms.Form):
         label="Engineer Choices", queryset=EngineerUser.objects.all(), required=True)
 
 
-def clean_field(self, cleaned_data, field_name):
-    field_data = cleaned_data.get(field_name)
+def clean_field(self, field_name):
+    field_data = self.cleaned_data.get(field_name)
     if field_data and '<script>' in field_data:
         self.add_error(field_name, f'Invalid {field_name.replace("_", " ")}')
 
