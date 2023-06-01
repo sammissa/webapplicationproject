@@ -28,7 +28,7 @@ from application.models import EngineerUser, Ticket
 
 
 class CustomTestCase(TestCase):
-    def setup(self):
+    def setUp(self):
         # Test values for Register form fields
         self.first_name = "John"
         self.last_name = "Smith"
