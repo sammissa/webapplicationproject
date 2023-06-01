@@ -51,6 +51,9 @@ class EditTicketForm(forms.ModelForm):
         model = Ticket
         fields = ("title", "created", "priority", "description", "status")
 
+    def clean(self):
+        return super().clean()
+
     def clean_description(self):
         return clean_field(self, field_name="description")
 
