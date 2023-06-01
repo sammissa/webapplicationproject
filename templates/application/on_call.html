@@ -1,7 +1,7 @@
 <h2>On Call</h2>
 {% if on_call.exists %}
     {% for engineer in on_call %}
-    <p>Current on call: {{ engineer.name }}</p>
+    <p>Current on call: {{ engineer }}</p>
     {% endfor %}
 {% else %}
     <p>No engineer currently on call.</p>

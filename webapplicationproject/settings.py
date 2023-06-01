@@ -24,6 +24,7 @@ DEBUG = False
 
 ALLOWED_HOSTS = [
     'fierce-refuge-23993.herokuapp.com',
+    '127.0.0.1'
 ]
 
 # Application definition
@@ -110,6 +111,8 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
+
+AUTH_USER_MODEL = 'application.EngineerUser'
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.2/topics/i18n/

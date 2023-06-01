@@ -25,11 +25,10 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth.models import User
 from django.core.validators import MinLengthValidator, MaxLengthValidator, EmailValidator
 from django.utils.html import escape
 
-from application.models import Engineer, Ticket
+from application.models import Ticket, EngineerUser
 
 
 class CreateTicketForm(forms.ModelForm):
@@ -86,8 +85,8 @@ class RegisterForm(UserCreationForm):
         self.helper.add_input(Submit('submit', 'Register'))
 
     class Meta:
-        model = User
-        fields = ("first_name", "last_name", "username", "email", "password1", "password2", "is_superuser")
+        model = EngineerUser
+        fields = ("first_name", "last_name", "username", "email", "password1", "password2")
 
     def clean_first_name(self):
         return clean_field(self, field_name="first_name")
@@ -98,19 +97,10 @@ class RegisterForm(UserCreationForm):
     def clean_email(self):
         return clean_field(self, field_name="email")
 
-    def save(self, commit=True):
-        user = super(RegisterForm, self).save(commit=False)
-        engineer = Engineer()
-        engineer.name = user.get_full_name()
-        if commit:
-            engineer.save()
-            user.save()
-        return user
-
 
 class SetOnCallForm(forms.Form):
     engineer = forms.ModelChoiceField(
-        label="Engineer Choices", queryset=Engineer.objects.all(), required=True)
+        label="Engineer Choices", queryset=EngineerUser.objects.all(), required=True)
 
 
 def clean_field(self, field_name):

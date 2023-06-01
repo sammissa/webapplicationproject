@@ -5,11 +5,15 @@ References:
     Visual Studio Code (no date) [online] Python and Django tutorial in Visual Studio Code. Available at:
     https://code.visualstudio.com/docs/python/tutorial-django (Accessed: 13 April 2022).
 """
+from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 
-class Engineer(models.Model):
+class EngineerUser(AbstractUser):
+    first_name = models.CharField(max_length=50)
+    last_name = models.CharField(max_length=50)
+    email = models.EmailField(unique=True)
     is_on_call = models.BooleanField(
         _('on call status'),
         default=False,
@@ -17,10 +21,11 @@ class Engineer(models.Model):
             'States if engineer is currently on call'
         ),
     )
-    name = models.CharField(max_length=100)
+
+    REQUIRED_FIELDS = ["email", "first_name", "last_name"]
 
     def __str__(self):
-        return self.name
+        return self.get_full_name()
 
 
 class Ticket(models.Model):
@@ -69,4 +74,4 @@ class Ticket(models.Model):
         ),
         max_length=50
     )
-    reporter = models.ForeignKey(Engineer, on_delete=models.CASCADE, blank=True)
+    reporter = models.ForeignKey(EngineerUser, on_delete=models.CASCADE, blank=True)

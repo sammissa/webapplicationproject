@@ -33,7 +33,7 @@ from django.utils import timezone
 from django.views.generic import ListView, DeleteView
 
 from application.forms import CreateTicketForm, RegisterForm, SetOnCallForm, EditTicketForm
-from application.models import Ticket, Engineer
+from application.models import Ticket, EngineerUser
 
 
 class TicketListView(LoginRequiredMixin, ListView):
@@ -43,13 +43,13 @@ class TicketListView(LoginRequiredMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super(TicketListView, self).get_context_data(**kwargs)
-        context["on_call"] = Engineer.objects.filter(is_on_call=True)
+        context["on_call"] = EngineerUser.objects.filter(is_on_call=True)
         return context
 
     def get_queryset(self):
         if self.request.path == "/user_tickets/":
             user = get_user(self.request)
-            return Ticket.objects.filter(reporter__name=user.get_full_name())
+            return Ticket.objects.filter(reporter=user)
         return Ticket.objects.all()
 
 
@@ -109,10 +109,7 @@ def create_ticket_request(request):
         if form.is_valid():
             ticket = form.save(commit=False)
             ticket.created = timezone.now()
-            user = get_user(request)
-            reporters = Engineer.objects.filter(name=user.get_full_name())
-            if reporters.count() != 0:
-                ticket.reporter = reporters[0]
+            ticket.reporter = get_user(request)
             ticket.save()
             messages.info(request, f"Ticket: [{ticket.title}] has been added.")
             return redirect("tickets")
@@ -144,10 +141,10 @@ def set_on_call_request(request):
     if request.method == "POST":
         if form.is_valid():
             engineer_id = form.cleaned_data.get("engineer").id
-            Engineer.objects.filter(is_on_call=True).update(is_on_call=False)
-            engineer = Engineer.objects.get(pk=engineer_id)
+            EngineerUser.objects.filter(is_on_call=True).update(is_on_call=False)
+            engineer = EngineerUser.objects.get(pk=engineer_id)
             engineer.is_on_call = True
             engineer.save(update_fields=["is_on_call"])
-            messages.info(request, f"On call changed to: {engineer.name}.")
+            messages.info(request, f"On call changed to: {engineer}.")
             return redirect("tickets")
     return render(request=request, template_name="application/set_on_call.html", context={"set_on_call": form})

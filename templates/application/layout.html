@@ -18,8 +18,8 @@ References:
 <body>
 <div class="navbar">
     <a href="{% url 'home' %}" class="navbar-brand">Home</a>
-    <a href="{% url 'tickets' %}" class="navbar-item">Tickets</a>
-    <a href="{% url 'user_tickets' %}" class="navbar-item">User Tickets</a>
+    <a href="{% url 'tickets' %}" class="navbar-item">All Tickets</a>
+    <a href="{% url 'user_tickets' %}" class="navbar-item">My Tickets</a>
     <a href="{% url 'set_on_call' %}" class="navbar-item">Set On Call</a>
     <a href="{% url 'ticket_form' %}" class="navbar-item">Create Ticket</a>
     <a href="{% url 'login' %}" class="navbar-item" {% if request.user.is_authenticated %}style="display: none"
