@@ -46,29 +46,28 @@ class CustomTestCase(TestCase):
         # Malicious input for XSS tests
         self.malicious_input = '<script>alert("XSS attack");</script>'
 
-        # Test user
-        self.user = EngineerUser.objects.create_user(username=self.username,
-                                                     email=self.email,
-                                                     password=self.password,
-                                                     first_name=self.first_name,
-                                                     last_name=self.last_name)
+        # Create user
+        user = EngineerUser.objects.create_user(username=self.username,
+                                                email=self.email,
+                                                password=self.password,
+                                                first_name=self.first_name,
+                                                last_name=self.last_name)
 
-        # Test admin user
-        self.admin_user = EngineerUser.objects.create_user(username="admin",
-                                                           email="admin@qa.com",
-                                                           password=self.password,
-                                                           first_name="Admin",
-                                                           last_name="User",
-                                                           is_on_call=True,
-                                                           is_superuser=True)
+        # Create admin user
+        EngineerUser.objects.create_superuser(username="admin",
+                                              email="admin@qa.com",
+                                              password=self.password,
+                                              first_name="Admin",
+                                              last_name="User",
+                                              is_on_call=True)
 
-        # Test ticket
-        self.ticket = Ticket.objects.create(title=self.title,
-                                            created=self.time,
-                                            priority=self.priority,
-                                            description=self.description,
-                                            status=self.status,
-                                            reporter=self.user)
+        # Create ticket
+        Ticket.objects.create(title=self.title,
+                              created=self.time,
+                              priority=self.priority,
+                              description=self.description,
+                              status=self.status,
+                              reporter=user)
 
 
 class CreateTicketFormTestCase(CustomTestCase):
@@ -104,11 +103,12 @@ class CreateTicketFormTestCase(CustomTestCase):
         self.assertTrue(form.is_valid())
 
     def test_form_is_not_valid_if_title_exists(self):
+        reporter = EngineerUser.objects.get(pk=1)
         form = CreateTicketForm(data={"title": self.title,
                                       "priority": self.priority,
                                       "description": self.description,
                                       "status": self.status,
-                                      "reporter": self.user})
+                                      "reporter": reporter})
 
         self.assertFalse(form.is_valid())
 
@@ -147,21 +147,24 @@ class CreateTicketFormTestCase(CustomTestCase):
 
 class EditTicketFormTestCase(CustomTestCase):
     def test_form_is_not_valid_without_description(self):
-        form = EditTicketForm(instance=self.ticket, data={"priority": self.priority, "status": self.status})
+        ticket = Ticket.objects.get(pk=1)
+        form = EditTicketForm(instance=ticket, data={"priority": self.priority, "status": self.status})
 
         self.assertFalse(form.is_valid())
 
     def test_form_is_valid(self):
-        form = EditTicketForm(instance=self.ticket, data={"priority": self.priority,
-                                                          "description": "New Description",
-                                                          "status": self.status})
+        ticket = Ticket.objects.get(pk=1)
+        form = EditTicketForm(instance=ticket, data={"priority": self.priority,
+                                                     "description": "New Description",
+                                                     "status": self.status})
 
         self.assertTrue(form.is_valid())
 
     def test_form_description_against_xss(self):
-        form = EditTicketForm(instance=self.ticket, data={"priority": self.priority,
-                                                          "description": self.malicious_input,
-                                                          "status": self.status})
+        ticket = Ticket.objects.get(pk=1)
+        form = EditTicketForm(instance=ticket, data={"priority": self.priority,
+                                                     "description": self.malicious_input,
+                                                     "status": self.status})
 
         # Check that the form is not valid
         self.assertFalse(form.is_valid())
@@ -310,13 +313,15 @@ class SetOnCallFormTestCase(CustomTestCase):
 
 class TicketTestCase(CustomTestCase):
     def test_ticket(self):
-        self.assertEqual(self.ticket.title, self.title)
-        self.assertEqual(self.ticket.created, self.time)
-        self.assertEqual(self.ticket.priority, self.priority)
-        self.assertEqual(self.ticket.description, self.description)
-        self.assertEqual(self.ticket.status, self.status)
-        self.assertEqual(self.ticket.reporter.get_full_name(), "John Smith")
-        self.assertEqual(self.ticket.reporter.is_on_call, False)
+        ticket = Ticket.objects.get(pk=1)
+
+        self.assertEqual(ticket.title, self.title)
+        self.assertEqual(ticket.created, self.time)
+        self.assertEqual(ticket.priority, self.priority)
+        self.assertEqual(ticket.description, self.description)
+        self.assertEqual(ticket.status, self.status)
+        self.assertEqual(ticket.reporter.get_full_name(), "John Smith")
+        self.assertEqual(ticket.reporter.is_on_call, False)
 
 
 class ViewsTestCase(CustomTestCase):
