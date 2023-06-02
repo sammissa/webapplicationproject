@@ -26,47 +26,47 @@ from pytz import UTC
 from application.forms import CreateTicketForm, EditTicketForm, RegisterForm, SetOnCallForm
 from application.models import EngineerUser, Ticket
 
+# Test values for Register form fields
+FIRST_NAME = "John"
+LAST_NAME = "Smith"
+EMAIL = "user@qa.com"
+USERNAME = "user"
+PASSWORD = "123Password789!"
+
+# Test values for Ticket form fields
+TITLE = "Test Title"
+PRIORITY = Ticket.Priority.LOW
+DESCRIPTION = "Test Description"
+STATUS = Ticket.Status.TD
+TIME = timezone.datetime(year=2023, month=1, day=1, tzinfo=UTC)
+
+# Malicious input for XSS tests
+MALICIOUS_INPUT = '<script>alert("XSS attack");</script>'
+
 
 class CustomTestCase(TestCase):
     def setUp(self):
-        # Test values for Register form fields
-        self.first_name = "John"
-        self.last_name = "Smith"
-        self.email = "user@qa.com"
-        self.username = "user"
-        self.password = "123Password789!"
-
-        # Test values for Ticket form fields
-        self.title = "Test Title"
-        self.priority = Ticket.Priority.LOW
-        self.description = "Test Description"
-        self.status = Ticket.Status.TD
-        self.time = timezone.datetime(year=2023, month=1, day=1, tzinfo=UTC)
-
-        # Malicious input for XSS tests
-        self.malicious_input = '<script>alert("XSS attack");</script>'
-
         # Create user
-        user = EngineerUser.objects.create_user(username=self.username,
-                                                email=self.email,
-                                                password=self.password,
-                                                first_name=self.first_name,
-                                                last_name=self.last_name)
+        user = EngineerUser.objects.create_user(username=USERNAME,
+                                                email=EMAIL,
+                                                password=PASSWORD,
+                                                first_name=FIRST_NAME,
+                                                last_name=LAST_NAME)
 
         # Create admin user
         EngineerUser.objects.create_superuser(username="admin",
                                               email="admin@qa.com",
-                                              password=self.password,
+                                              password=PASSWORD,
                                               first_name="Admin",
                                               last_name="User",
                                               is_on_call=True)
 
         # Create ticket
-        Ticket.objects.create(title=self.title,
-                              created=self.time,
-                              priority=self.priority,
-                              description=self.description,
-                              status=self.status,
+        Ticket.objects.create(title=TITLE,
+                              created=TIME,
+                              priority=PRIORITY,
+                              description=DESCRIPTION,
+                              status=STATUS,
                               reporter=user)
 
 
@@ -78,45 +78,45 @@ class CreateTicketFormTestCase(CustomTestCase):
 
     def test_form_is_not_valid_without_title(self):
         form = CreateTicketForm(
-            data={"priority": self.priority, "description": self.description, "status": self.status})
+            data={"priority": PRIORITY, "description": DESCRIPTION, "status": STATUS})
 
         self.assertFalse(form.is_valid())
 
     def test_form_is_not_valid_without_description(self):
-        form = CreateTicketForm(data={"title": self.title, "priority": self.priority, "status": self.status})
+        form = CreateTicketForm(data={"title": TITLE, "priority": PRIORITY, "status": STATUS})
 
         self.assertFalse(form.is_valid())
 
     def test_form_is_not_valid_without_priority(self):
-        form = CreateTicketForm(data={"title": self.title,
-                                      "description": self.description,
-                                      "status": self.status})
+        form = CreateTicketForm(data={"title": TITLE,
+                                      "description": DESCRIPTION,
+                                      "status": STATUS})
 
         self.assertFalse(form.is_valid())
 
     def test_form_is_valid(self):
         form = CreateTicketForm(data={"title": "Title",
-                                      "priority": self.priority,
-                                      "description": self.description,
-                                      "status": self.status})
+                                      "priority": PRIORITY,
+                                      "description": DESCRIPTION,
+                                      "status": STATUS})
 
         self.assertTrue(form.is_valid())
 
     def test_form_is_not_valid_if_title_exists(self):
         reporter = EngineerUser.objects.get(pk=1)
-        form = CreateTicketForm(data={"title": self.title,
-                                      "priority": self.priority,
-                                      "description": self.description,
-                                      "status": self.status,
+        form = CreateTicketForm(data={"title": TITLE,
+                                      "priority": PRIORITY,
+                                      "description": DESCRIPTION,
+                                      "status": STATUS,
                                       "reporter": reporter})
 
         self.assertFalse(form.is_valid())
 
     def test_form_title_against_xss(self):
-        form = CreateTicketForm(data={"title": self.malicious_input,
-                                      "priority": self.priority,
-                                      "description": self.description,
-                                      "status": self.status})
+        form = CreateTicketForm(data={"title": MALICIOUS_INPUT,
+                                      "priority": PRIORITY,
+                                      "description": DESCRIPTION,
+                                      "status": STATUS})
 
         # Check that the form is not valid
         self.assertFalse(form.is_valid())
@@ -129,10 +129,10 @@ class CreateTicketFormTestCase(CustomTestCase):
         self.assertEqual(form.errors['title'][0], expected_error_message)
 
     def test_form_description_against_xss(self):
-        form = CreateTicketForm(data={"title": self.title,
-                                      "priority": self.priority,
-                                      "description": self.malicious_input,
-                                      "status": self.status})
+        form = CreateTicketForm(data={"title": TITLE,
+                                      "priority": PRIORITY,
+                                      "description": MALICIOUS_INPUT,
+                                      "status": STATUS})
 
         # Check that the form is not valid
         self.assertFalse(form.is_valid())
@@ -148,23 +148,23 @@ class CreateTicketFormTestCase(CustomTestCase):
 class EditTicketFormTestCase(CustomTestCase):
     def test_form_is_not_valid_without_description(self):
         ticket = Ticket.objects.get(pk=1)
-        form = EditTicketForm(instance=ticket, data={"priority": self.priority, "status": self.status})
+        form = EditTicketForm(instance=ticket, data={"priority": PRIORITY, "status": STATUS})
 
         self.assertFalse(form.is_valid())
 
     def test_form_is_valid(self):
         ticket = Ticket.objects.get(pk=1)
-        form = EditTicketForm(instance=ticket, data={"priority": self.priority,
+        form = EditTicketForm(instance=ticket, data={"priority": PRIORITY,
                                                      "description": "New Description",
-                                                     "status": self.status})
+                                                     "status": STATUS})
 
         self.assertTrue(form.is_valid())
 
     def test_form_description_against_xss(self):
         ticket = Ticket.objects.get(pk=1)
-        form = EditTicketForm(instance=ticket, data={"priority": self.priority,
-                                                     "description": self.malicious_input,
-                                                     "status": self.status})
+        form = EditTicketForm(instance=ticket, data={"priority": PRIORITY,
+                                                     "description": MALICIOUS_INPUT,
+                                                     "status": STATUS})
 
         # Check that the form is not valid
         self.assertFalse(form.is_valid())
@@ -184,86 +184,86 @@ class RegisterFormTestCase(CustomTestCase):
         self.assertFalse(form.is_valid())
 
     def test_form_is_not_valid_without_first_name(self):
-        form = RegisterForm(data={"last_name": self.last_name,
-                                  "username": self.username,
-                                  "email": self.email,
-                                  "password1": self.password,
-                                  "password2": self.password})
+        form = RegisterForm(data={"last_name": LAST_NAME,
+                                  "username": USERNAME,
+                                  "email": EMAIL,
+                                  "password1": PASSWORD,
+                                  "password2": PASSWORD})
 
         self.assertFalse(form.is_valid())
 
     def test_form_is_not_valid_without_last_name(self):
-        form = RegisterForm(data={"first_name": self.first_name,
-                                  "username": self.username,
-                                  "email": self.email,
-                                  "password1": self.password,
-                                  "password2": self.password})
+        form = RegisterForm(data={"first_name": FIRST_NAME,
+                                  "username": USERNAME,
+                                  "email": EMAIL,
+                                  "password1": PASSWORD,
+                                  "password2": PASSWORD})
 
         self.assertFalse(form.is_valid())
 
     def test_form_is_not_valid_without_username(self):
-        form = RegisterForm(data={"first_name": self.first_name,
-                                  "last_name": self.last_name,
-                                  "email": self.email,
-                                  "password1": self.password,
-                                  "password2": self.password})
+        form = RegisterForm(data={"first_name": FIRST_NAME,
+                                  "last_name": LAST_NAME,
+                                  "email": EMAIL,
+                                  "password1": PASSWORD,
+                                  "password2": PASSWORD})
 
         self.assertFalse(form.is_valid())
 
     def test_form_is_not_valid_without_email(self):
-        form = RegisterForm(data={"first_name": self.first_name,
-                                  "last_name": self.last_name,
-                                  "username": self.username,
-                                  "password1": self.password,
-                                  "password2": self.password})
+        form = RegisterForm(data={"first_name": FIRST_NAME,
+                                  "last_name": LAST_NAME,
+                                  "username": USERNAME,
+                                  "password1": PASSWORD,
+                                  "password2": PASSWORD})
 
         self.assertFalse(form.is_valid())
 
     def test_form_is_not_valid_without_password1(self):
-        form = RegisterForm(data={"first_name": self.first_name,
-                                  "last_name": self.last_name,
-                                  "username": self.username,
-                                  "email": self.email,
-                                  "password2": self.password})
+        form = RegisterForm(data={"first_name": FIRST_NAME,
+                                  "last_name": LAST_NAME,
+                                  "username": USERNAME,
+                                  "email": EMAIL,
+                                  "password2": PASSWORD})
 
         self.assertFalse(form.is_valid())
 
     def test_form_is_not_valid_without_password2(self):
-        form = RegisterForm(data={"first_name": self.first_name,
-                                  "last_name": self.last_name,
-                                  "username": self.username,
-                                  "email": self.email,
-                                  "password1": self.password})
+        form = RegisterForm(data={"first_name": FIRST_NAME,
+                                  "last_name": LAST_NAME,
+                                  "username": USERNAME,
+                                  "email": EMAIL,
+                                  "password1": PASSWORD})
 
         self.assertFalse(form.is_valid())
 
     def test_form_is_not_valid_without_matching_passwords(self):
-        form = RegisterForm(data={"first_name": self.first_name,
-                                  "last_name": self.last_name,
-                                  "username": self.username,
-                                  "email": self.email,
-                                  "password1": self.password,
+        form = RegisterForm(data={"first_name": FIRST_NAME,
+                                  "last_name": LAST_NAME,
+                                  "username": USERNAME,
+                                  "email": EMAIL,
+                                  "password1": PASSWORD,
                                   "password2": "123testpassword"})
 
         self.assertFalse(form.is_valid())
 
     def test_form_is_valid(self):
-        form = RegisterForm(data={"first_name": self.first_name,
-                                  "last_name": self.last_name,
+        form = RegisterForm(data={"first_name": FIRST_NAME,
+                                  "last_name": LAST_NAME,
                                   "username": "Test",
                                   "email": "test@qa.com",
-                                  "password1": self.password,
-                                  "password2": self.password})
+                                  "password1": PASSWORD,
+                                  "password2": PASSWORD})
 
         self.assertTrue(form.is_valid())
 
     def test_form_first_name_against_xss(self):
-        form = RegisterForm(data={"first_name": self.malicious_input,
-                                  "last_name": self.last_name,
-                                  "username": self.username,
-                                  "email": self.email,
-                                  "password1": self.password,
-                                  "password2": self.password})
+        form = RegisterForm(data={"first_name": MALICIOUS_INPUT,
+                                  "last_name": LAST_NAME,
+                                  "username": USERNAME,
+                                  "email": EMAIL,
+                                  "password1": PASSWORD,
+                                  "password2": PASSWORD})
 
         # Check that the form is not valid
         self.assertFalse(form.is_valid())
@@ -276,12 +276,12 @@ class RegisterFormTestCase(CustomTestCase):
         self.assertEqual(form.errors['first_name'][0], expected_error_message)
 
     def test_form_last_name_against_xss(self):
-        form = RegisterForm(data={"first_name": self.first_name,
-                                  "last_name": self.malicious_input,
-                                  "username": self.username,
-                                  "email": self.email,
-                                  "password1": self.password,
-                                  "password2": self.password})
+        form = RegisterForm(data={"first_name": FIRST_NAME,
+                                  "last_name": MALICIOUS_INPUT,
+                                  "username": USERNAME,
+                                  "email": EMAIL,
+                                  "password1": PASSWORD,
+                                  "password2": PASSWORD})
 
         # Check that the form is not valid
         self.assertFalse(form.is_valid())
@@ -315,11 +315,11 @@ class TicketTestCase(CustomTestCase):
     def test_ticket(self):
         ticket = Ticket.objects.get(pk=1)
 
-        self.assertEqual(ticket.title, self.title)
-        self.assertEqual(ticket.created, self.time)
-        self.assertEqual(ticket.priority, self.priority)
-        self.assertEqual(ticket.description, self.description)
-        self.assertEqual(ticket.status, self.status)
+        self.assertEqual(ticket.title, TITLE)
+        self.assertEqual(ticket.created, TIME)
+        self.assertEqual(ticket.priority, PRIORITY)
+        self.assertEqual(ticket.description, DESCRIPTION)
+        self.assertEqual(ticket.status, STATUS)
         self.assertEqual(ticket.reporter.get_full_name(), "John Smith")
         self.assertEqual(ticket.reporter.is_on_call, False)
 
@@ -394,9 +394,9 @@ class ViewsTestCase(CustomTestCase):
         self.login_helper()
         response = self.client.post(reverse("ticket_form"), data={
             "title": "Title",
-            "priority": self.priority,
-            "description": self.description,
-            "status": self.status
+            "priority": PRIORITY,
+            "description": DESCRIPTION,
+            "status": STATUS
         })
         self.assertEqual(response.status_code, 302)
         messages = [m.message for m in get_messages(response.wsgi_request)]
@@ -447,7 +447,7 @@ class ViewsTestCase(CustomTestCase):
         self.assertEqual(len(ticket_list), 1)
 
         ticket = ticket_list[0]
-        self.assertEqual(self.title, ticket.title)
+        self.assertEqual(TITLE, ticket.title)
 
         on_call = response.context["on_call"]
         self.assertEqual(len(on_call), 1)
@@ -474,7 +474,7 @@ class ViewsTestCase(CustomTestCase):
         self.assertTemplateUsed(response, "application/edit_ticket_form.html")
         self.assertTrue("instance" in response.context)
         instance = response.context["instance"]
-        self.assertEqual(self.title, instance.title)
+        self.assertEqual(TITLE, instance.title)
         response = self.client.post(reverse("edit_ticket", args=(ticket.id,)), data={
             "priority": Ticket.Priority.MED,
             "description": "Edited Description",
@@ -495,7 +495,7 @@ class ViewsTestCase(CustomTestCase):
     def test_delete_ticket_view(self):
         self.client.post(reverse("login"), data={
             "username": "admin",
-            "password": self.password
+            "password": PASSWORD
         })
         response = self.client.get("/tickets/")
         self.assertEqual(response.status_code, 200)
@@ -518,8 +518,8 @@ class ViewsTestCase(CustomTestCase):
 
     def login_helper(self):
         response = self.client.post(reverse("login"), data={
-            "username": self.username,
-            "password": self.password
+            "username": USERNAME,
+            "password": PASSWORD
         })
 
         return response
