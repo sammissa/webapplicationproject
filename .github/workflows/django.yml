@@ -40,3 +40,12 @@ jobs:
 
       - name: Run Tests
         run: python manage.py test
+
+      - name: Upload Test Results
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: Test Results
+          path: |
+            ./test-reports/
+            ./coverage/
