@@ -45,7 +45,8 @@ MALICIOUS_INPUT = '<script>alert("XSS attack");</script>'
 
 
 class CustomTestCase(TestCase):
-    def setUp(self):
+    @classmethod
+    def setUpTestData(cls):
         # Create user
         user = EngineerUser.objects.create_user(username=USERNAME,
                                                 email=EMAIL,
