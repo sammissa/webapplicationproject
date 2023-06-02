@@ -6,7 +6,7 @@ References:
     MDN Contributors (2022) [online] Django Tutorial Part 10. Available at:
     https://developer.mozilla.org/en-US/docs/Learn/Server-side/Django/Testing (Accessed: 14 April 2022).
 
-    EngineerTestCase and TicketTestCase were based on the following:
+    EngineerUserTestCase and TicketTestCase were based on the following:
 
     Django (no date) [online] Writing and running tests | Django documentation. Available at:
     https://docs.djangoproject.com/en/4.0/topics/testing/overview/ (Accessed: 13 April 2022).
@@ -17,6 +17,7 @@ References:
     https://stackoverflow.com/a/46865530 (Accessed: 21 April 2022).
 """
 from django.contrib.auth import get_user_model
+from django.contrib.auth.hashers import check_password
 from django.contrib.messages import get_messages
 from django.test import TestCase
 from django.urls import reverse
@@ -48,11 +49,11 @@ class CustomTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
         # Create user
-        user = EngineerUser.objects.create_user(username=USERNAME,
-                                                email=EMAIL,
-                                                password=PASSWORD,
-                                                first_name=FIRST_NAME,
-                                                last_name=LAST_NAME)
+        EngineerUser.objects.create_user(username=USERNAME,
+                                         email=EMAIL,
+                                         password=PASSWORD,
+                                         first_name=FIRST_NAME,
+                                         last_name=LAST_NAME)
 
         # Create admin user
         EngineerUser.objects.create_superuser(username="admin",
@@ -61,14 +62,6 @@ class CustomTestCase(TestCase):
                                               first_name="Admin",
                                               last_name="User",
                                               is_on_call=True)
-
-        # Create ticket
-        Ticket.objects.create(title=TITLE,
-                              created=TIME,
-                              priority=PRIORITY,
-                              description=DESCRIPTION,
-                              status=STATUS,
-                              reporter=user)
 
 
 class CreateTicketFormTestCase(CustomTestCase):
@@ -96,7 +89,7 @@ class CreateTicketFormTestCase(CustomTestCase):
         self.assertFalse(form.is_valid())
 
     def test_form_is_valid(self):
-        form = CreateTicketForm(data={"title": "Title",
+        form = CreateTicketForm(data={"title": TITLE,
                                       "priority": PRIORITY,
                                       "description": DESCRIPTION,
                                       "status": STATUS})
@@ -104,12 +97,19 @@ class CreateTicketFormTestCase(CustomTestCase):
         self.assertTrue(form.is_valid())
 
     def test_form_is_not_valid_if_title_exists(self):
-        reporter = EngineerUser.objects.get(pk=1)
+        user = EngineerUser.objects.get(pk=1)
+        Ticket.objects.create(title=TITLE,
+                              created=TIME,
+                              priority=PRIORITY,
+                              description=DESCRIPTION,
+                              status=STATUS,
+                              reporter=user)
+
         form = CreateTicketForm(data={"title": TITLE,
                                       "priority": PRIORITY,
                                       "description": DESCRIPTION,
                                       "status": STATUS,
-                                      "reporter": reporter})
+                                      "reporter": user})
 
         self.assertFalse(form.is_valid())
 
@@ -148,13 +148,25 @@ class CreateTicketFormTestCase(CustomTestCase):
 
 class EditTicketFormTestCase(CustomTestCase):
     def test_form_is_not_valid_without_description(self):
-        ticket = Ticket.objects.get(pk=1)
+        user = EngineerUser.objects.get(pk=1)
+        ticket = Ticket.objects.create(title=TITLE,
+                                       created=TIME,
+                                       priority=PRIORITY,
+                                       description=DESCRIPTION,
+                                       status=STATUS,
+                                       reporter=user)
         form = EditTicketForm(instance=ticket, data={"priority": PRIORITY, "status": STATUS})
 
         self.assertFalse(form.is_valid())
 
     def test_form_is_valid(self):
-        ticket = Ticket.objects.get(pk=1)
+        user = EngineerUser.objects.get(pk=1)
+        ticket = Ticket.objects.create(title=TITLE,
+                                       created=TIME,
+                                       priority=PRIORITY,
+                                       description=DESCRIPTION,
+                                       status=STATUS,
+                                       reporter=user)
         form = EditTicketForm(instance=ticket, data={"priority": PRIORITY,
                                                      "description": "New Description",
                                                      "status": STATUS})
@@ -162,7 +174,13 @@ class EditTicketFormTestCase(CustomTestCase):
         self.assertTrue(form.is_valid())
 
     def test_form_description_against_xss(self):
-        ticket = Ticket.objects.get(pk=1)
+        user = EngineerUser.objects.get(pk=1)
+        ticket = Ticket.objects.create(title=TITLE,
+                                       created=TIME,
+                                       priority=PRIORITY,
+                                       description=DESCRIPTION,
+                                       status=STATUS,
+                                       reporter=user)
         form = EditTicketForm(instance=ticket, data={"priority": PRIORITY,
                                                      "description": MALICIOUS_INPUT,
                                                      "status": STATUS})
@@ -312,9 +330,50 @@ class SetOnCallFormTestCase(CustomTestCase):
         self.assertTrue(form.is_valid())
 
 
+class EngineerUserTestCase(CustomTestCase):
+    def test_engineer_user(self):
+        user = EngineerUser.objects.create_user(username="testuser",
+                                                email="testuser@qa.com",
+                                                password=PASSWORD,
+                                                first_name="test",
+                                                last_name="user")
+        self.assertEqual(user.username, "testuser")
+        self.assertEqual(user.email, "testuser@qa.com")
+        self.assertEqual(user.get_full_name(), "test user")
+        self.assertEqual(user.is_on_call, False)
+        self.assertEqual(user.is_superuser, False)
+        self.assertEqual(user.is_staff, False)
+
+        # Assert that the password is correctly hashed
+        self.assertTrue(check_password(PASSWORD, user.password))
+
+    def test_admin_engineer_user(self):
+        admin_user = EngineerUser.objects.create_superuser(username="testadmin",
+                                                           email="testadmin@qa.com",
+                                                           password=PASSWORD,
+                                                           first_name="test",
+                                                           last_name="admin")
+
+        self.assertEqual(admin_user.username, "testadmin")
+        self.assertEqual(admin_user.email, "testadmin@qa.com")
+        self.assertEqual(admin_user.get_full_name(), "test admin")
+        self.assertEqual(admin_user.is_on_call, False)
+        self.assertEqual(admin_user.is_superuser, True)
+        self.assertEqual(admin_user.is_staff, True)
+
+        # Assert that the password is correctly hashed
+        self.assertTrue(check_password(PASSWORD, admin_user.password))
+
+
 class TicketTestCase(CustomTestCase):
     def test_ticket(self):
-        ticket = Ticket.objects.get(pk=1)
+        user = EngineerUser.objects.get(pk=1)
+        ticket = Ticket.objects.create(title=TITLE,
+                                       created=TIME,
+                                       priority=PRIORITY,
+                                       description=DESCRIPTION,
+                                       status=STATUS,
+                                       reporter=user)
 
         self.assertEqual(ticket.title, TITLE)
         self.assertEqual(ticket.created, TIME)
@@ -433,6 +492,14 @@ class ViewsTestCase(CustomTestCase):
         self.assertTrue(engineer.is_on_call)
 
     def test_tickets_view(self):
+        user = EngineerUser.objects.get(pk=1)
+        Ticket.objects.create(title=TITLE,
+                              created=TIME,
+                              priority=PRIORITY,
+                              description=DESCRIPTION,
+                              status=STATUS,
+                              reporter=user)
+
         response = self.client.get("/tickets/")
         self.assertEqual(response.status_code, 302)
 
@@ -464,6 +531,14 @@ class ViewsTestCase(CustomTestCase):
         self.assertTemplateUsed(response, "application/user_tickets.html")
 
     def test_edit_ticket_view(self):
+        user = EngineerUser.objects.get(pk=1)
+        Ticket.objects.create(title=TITLE,
+                              created=TIME,
+                              priority=PRIORITY,
+                              description=DESCRIPTION,
+                              status=STATUS,
+                              reporter=user)
+
         self.login_helper()
         response = self.client.get("/tickets/")
         self.assertEqual(response.status_code, 200)
@@ -494,6 +569,14 @@ class ViewsTestCase(CustomTestCase):
         self.assertEqual(Ticket.Status.IP, edited_ticket.status)
 
     def test_delete_ticket_view(self):
+        user = EngineerUser.objects.get(pk=1)
+        Ticket.objects.create(title=TITLE,
+                              created=TIME,
+                              priority=PRIORITY,
+                              description=DESCRIPTION,
+                              status=STATUS,
+                              reporter=user)
+
         self.client.post(reverse("login"), data={
             "username": "admin",
             "password": PASSWORD
