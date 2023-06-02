@@ -38,14 +38,14 @@ jobs:
       - name: Collect static files
         run: python manage.py collectstatic --noinput
 
-      - name: Run Tests
-        run: python manage.py test
+      - name: Run Tests with Coverage
+        run: coverage run --source='.' manage.py test
+
+      - name: Generate HTML Coverage Report
+        run: coverage html
 
       - name: Upload Test Results
-        if: ${{ always() }}
         uses: actions/upload-artifact@v3
         with:
           name: Test Results
-          path: |
-            ./test-reports/
-            ./coverage/
+          path: htmlcov
