@@ -32,7 +32,7 @@ from django.urls import reverse_lazy
 from django.utils import timezone
 from django.views.generic import ListView, DeleteView
 
-from application.forms import CreateTicketForm, RegisterForm, SetOnCallForm, EditTicketForm
+from application.forms import TicketCreationForm, EngineerUserCreationForm, OnCallChangeForm, TicketChangeForm
 from application.models import Ticket, EngineerUser
 
 
@@ -68,9 +68,9 @@ def home_request(request):
 
 
 def register_request(request):
-    form = RegisterForm(request.POST or None)
+    form = EngineerUserCreationForm(request.POST or None)
     if request.method == "POST":
-        form = RegisterForm(request.POST)
+        form = EngineerUserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
             login(request, user)
@@ -104,7 +104,7 @@ def logout_request(request):
 
 @login_required(login_url="login")
 def create_ticket_request(request):
-    form = CreateTicketForm(request.POST or None)
+    form = TicketCreationForm(request.POST or None)
     if request.method == "POST":
         if form.is_valid():
             ticket = form.save(commit=False)
@@ -124,7 +124,7 @@ def edit_ticket_request(request, pk):
     except Ticket.DoesNotExist:
         messages.error(request, "Ticket does not exist.")
         return render(request=request, template_name="application/tickets.html")
-    form = EditTicketForm(data=request.POST or None, instance=instance)
+    form = TicketChangeForm(data=request.POST or None, instance=instance)
     if request.method == "POST":
         if form.is_valid():
             form.save()
@@ -137,7 +137,7 @@ def edit_ticket_request(request, pk):
 
 @login_required(login_url="login")
 def set_on_call_request(request):
-    form = SetOnCallForm(request.POST or None)
+    form = OnCallChangeForm(request.POST or None)
     if request.method == "POST":
         if form.is_valid():
             engineer_id = form.cleaned_data.get("engineer").id

@@ -12,8 +12,8 @@ A simple on-call ticket web database application was created based on the requir
 * Set On Call (Updates database)
 * Update Ticket (Updates database)
 * Remove Ticket (Deletes in database - ADMIN)
+* Remove User (Deletes in database - ADMIN)
 
 **Database Tables:**
 * Ticket
-* Engineer
-* django.contrib.auth.models.User
+* EngineerUser (Based on django.contrib.auth.models.User)
