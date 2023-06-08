@@ -1,16 +1,12 @@
+import logging
+
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 
 from application.forms import EngineerUserCreationForm, EngineerUserChangeForm, TicketCreationForm
 from application.models import EngineerUser, Ticket
 
-
-@admin.register(Ticket)
-class TicketAdmin(admin.ModelAdmin):
-    form = TicketCreationForm
-    list_display = ('title', 'priority', 'status', 'reporter')
-    list_filter = ('priority', 'status')
-    search_fields = ('title', 'reporter__name')
+logger = logging.getLogger()
 
 
 @admin.register(EngineerUser)
@@ -33,11 +29,28 @@ class EngineerUserAdmin(UserAdmin):
     )
 
     def save_model(self, request, obj, form, change):
-        initial_user = EngineerUser.objects.get(pk=obj.pk)
+        try:
+            initial_user = EngineerUser.objects.get(pk=obj.pk)
+            initial_is_on_call = initial_user.is_on_call
+        except EngineerUser.DoesNotExist:
+            initial_is_on_call = False
 
         # Save the user model
         super().save_model(request, obj, form, change)
 
         # If the is_on_call status has changed to True, update other users
-        if change and form.instance.is_on_call and not initial_user.is_on_call:
+        if change and form.instance.is_on_call and not initial_is_on_call:
             EngineerUser.objects.exclude(pk=obj.pk).update(is_on_call=False)
+
+
+@admin.register(Ticket)
+class TicketAdmin(admin.ModelAdmin):
+    form = TicketCreationForm
+    list_display = ('title', 'priority', 'status', 'reporter')
+    list_filter = ('priority', 'status')
+    search_fields = ('title', 'reporter__name')
+
+    def save_model(self, request, obj, form, change):
+        if not change:
+            obj.reporter = request.user
+        obj.save()

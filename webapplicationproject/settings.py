@@ -37,9 +37,11 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'application.apps.ApplicationConfig',
+    'logger.apps.LoggerConfig',
     'whitenoise.runserver_nostatic',
     'crispy_forms',
     'crispy_bootstrap4',
+    'django_db_logger',
 ]
 
 MIDDLEWARE = [
@@ -113,6 +115,28 @@ AUTH_PASSWORD_VALIDATORS = [
 
 AUTH_USER_MODEL = 'application.EngineerUser'
 
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s'
+        },
+        'simple': {
+            'format': '%(levelname)s %(asctime)s %(message)s'
+        },
+    },
+    'handlers': {
+        'all_log': {
+            'level': 'INFO',
+            'class': 'logger.db_log_handler.CustomDatabaseLogHandler'
+        },
+    },
+    'root': {
+        'handlers': ['all_log'],
+        'level': 'INFO',
+    }
+}
 # Internationalization
 # https://docs.djangoproject.com/en/3.2/topics/i18n/
 

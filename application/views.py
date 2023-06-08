@@ -22,6 +22,8 @@ References:
     Roseman, D. (2018) [online] Django, how to include pre-existing data in update form view, Stack Overflow.
     Available at: https://stackoverflow.com/a/52494854 (Accessed: 19 April 2022).
 """
+import logging
+
 from django.contrib import messages
 from django.contrib.auth import login, authenticate, get_user, logout
 from django.contrib.auth.decorators import login_required
@@ -29,11 +31,24 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
-from django.utils import timezone
 from django.views.generic import ListView, DeleteView
 
 from application.forms import TicketCreationForm, EngineerUserCreationForm, OnCallChangeForm, TicketChangeForm
 from application.models import Ticket, EngineerUser
+
+# Define static message strings
+REGISTRATION_SUCCESSFUL = "Registration was successful."
+REGISTRATION_UNSUCCESSFUL = "Registration was unsuccessful."
+INVALID_CREDENTIALS = "Invalid username or password."
+INVALID_FORM = "Invalid form."
+LOGGED_IN = "You are now logged in."
+LOGGED_OUT = "You are now logged out."
+TICKET_CREATED = "Ticket was created."
+TICKET_UPDATED = "Ticket was updated."
+TICKET_DELETED = "Ticket was deleted."
+TICKET_MISSING = "Ticket does not exist."
+
+logger = logging.getLogger()
 
 
 class TicketListView(LoginRequiredMixin, ListView):
@@ -59,7 +74,8 @@ class TicketDeleteView(PermissionRequiredMixin, DeleteView):
     context_object_name = "delete_ticket_form"
 
     def get_success_url(self):
-        messages.info(self.request, "Ticket deleted successfully.")
+        messages.info(self.request, TICKET_DELETED)
+        logger.info(TICKET_DELETED, extra={'username': self.request.user.username})
         return reverse_lazy("tickets")
 
 
@@ -74,9 +90,11 @@ def register_request(request):
         if form.is_valid():
             user = form.save()
             login(request, user)
-            messages.success(request, "Registration successful.")
+            messages.success(request, REGISTRATION_SUCCESSFUL)
+            logger.info(REGISTRATION_SUCCESSFUL, extra={'username': user.username})
             return redirect("tickets")
-        messages.error(request, "Unsuccessful registration. Invalid information.")
+        messages.error(request, REGISTRATION_UNSUCCESSFUL)
+        logger.error(REGISTRATION_UNSUCCESSFUL)
     return render(request=request, template_name="application/register.html", context={"register_form": form})
 
 
@@ -89,31 +107,33 @@ def login_request(request):
             user = authenticate(username=username, password=password)
             if user is not None:
                 login(request, user)
-                messages.info(request, f"You are now logged in as {username}.")
+                messages.info(request, LOGGED_IN)
+                logger.info(LOGGED_IN, extra={'username': username})
                 return redirect("tickets")
-        messages.error(request, "Invalid username or password.")
+        messages.error(request, INVALID_CREDENTIALS)
+        logger.error(INVALID_CREDENTIALS)
     return render(request=request, template_name="application/login.html", context={"login_form": form})
 
 
 @login_required(login_url="login")
 def logout_request(request):
     logout(request)
-    messages.info(request, "You are now logged out.")
+    messages.info(request, LOGGED_OUT)
+    logger.info(LOGGED_OUT, extra={'username': request.user.username})
     return redirect("login")
 
 
 @login_required(login_url="login")
 def create_ticket_request(request):
-    form = TicketCreationForm(request.POST or None)
+    form = TicketCreationForm(request.POST or None, user=request.user)
     if request.method == "POST":
         if form.is_valid():
-            ticket = form.save(commit=False)
-            ticket.created = timezone.now()
-            ticket.reporter = get_user(request)
-            ticket.save()
-            messages.info(request, f"Ticket: [{ticket.title}] has been added.")
+            form.save()
+            messages.info(request, TICKET_CREATED)
+            logger.info(TICKET_CREATED, extra={'username': request.user.username})
             return redirect("tickets")
-        messages.error(request, "Form is not valid.")
+        messages.error(request, INVALID_FORM)
+        logger.error(INVALID_FORM, extra={'username': request.user.username})
     return render(request=request, template_name="application/ticket_form.html", context={"ticket_form": form})
 
 
@@ -121,16 +141,19 @@ def create_ticket_request(request):
 def edit_ticket_request(request, pk):
     try:
         instance = Ticket.objects.get(pk=pk)
-    except Ticket.DoesNotExist:
-        messages.error(request, "Ticket does not exist.")
+    except Ticket.DoesNotExist as e:
+        messages.error(request, TICKET_MISSING)
+        logger.exception(e, extra={'username': request.user.username})
         return render(request=request, template_name="application/tickets.html")
-    form = TicketChangeForm(data=request.POST or None, instance=instance)
+    form = TicketChangeForm(data=request.POST or None, instance=instance, user=request.user)
     if request.method == "POST":
         if form.is_valid():
             form.save()
-            messages.info(request, "Ticket updated successfully.")
+            messages.info(request, TICKET_UPDATED)
+            logger.info(TICKET_UPDATED, extra={'username': request.user.username})
             return redirect("tickets")
-        messages.error(request, "Form is not valid.")
+        messages.error(request, INVALID_FORM)
+        logger.error(INVALID_FORM, extra={'username': request.user.username})
     return render(request=request, template_name="application/edit_ticket_form.html",
                   context={"edit_ticket_form": form, "instance": instance})
 
@@ -145,6 +168,8 @@ def set_on_call_request(request):
             engineer = EngineerUser.objects.get(pk=engineer_id)
             engineer.is_on_call = True
             engineer.save(update_fields=["is_on_call"])
-            messages.info(request, f"On call changed to: {engineer}.")
+            message = f"On call changed to: {engineer}."
+            messages.info(request, message)
+            logger.info(message, extra={'username': request.user.username})
             return redirect("tickets")
     return render(request=request, template_name="application/set_on_call.html", context={"set_on_call": form})

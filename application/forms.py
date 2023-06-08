@@ -21,45 +21,19 @@ References:
     https://stackoverflow.com/questions/66655712/django-dropdown-menu-form-based-on-model-entries
     (Accessed: 13 April 2022).
 """
+import logging
+
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, UserChangeForm
 from django.core.validators import MinLengthValidator, MaxLengthValidator
+from django.utils import timezone
 from django.utils.html import escape
 
 from application.models import Ticket, EngineerUser
 
-
-class TicketCreationForm(forms.ModelForm):
-    class Meta:
-        model = Ticket
-        fields = ("title", "priority", "description", "status")
-
-    def clean(self):
-        cleaned_data = super().clean()
-        cleaned_title = clean_field(self, cleaned_data, "title")
-        cleaned_description = clean_field(self, cleaned_data, "description")
-        cleaned_data["title"] = cleaned_title
-        cleaned_data["description"] = cleaned_description
-
-        return cleaned_data
-
-
-class TicketChangeForm(forms.ModelForm):
-    title = forms.CharField(disabled=True)
-    created = forms.DateTimeField(disabled=True)
-
-    class Meta:
-        model = Ticket
-        fields = ("title", "created", "priority", "description", "status")
-
-    def clean(self):
-        cleaned_data = super().clean()
-        cleaned_description = clean_field(self, cleaned_data, "description")
-        cleaned_data["description"] = cleaned_description
-
-        return cleaned_data
+logger = logging.getLogger()
 
 
 class EngineerUserCreationForm(UserCreationForm):
@@ -125,17 +99,66 @@ class EngineerUserChangeForm(UserChangeForm):
         return cleaned_data
 
 
+class TicketCreationForm(forms.ModelForm):
+    class Meta:
+        model = Ticket
+        fields = ("title", "priority", "description", "status")
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        super(TicketCreationForm, self).__init__(*args, **kwargs)
+
+    def clean(self):
+        cleaned_data = super().clean()
+        cleaned_title = clean_field(self, cleaned_data, "title", self.user)
+        cleaned_description = clean_field(self, cleaned_data, "description", self.user)
+        cleaned_data["title"] = cleaned_title
+        cleaned_data["description"] = cleaned_description
+
+        return cleaned_data
+
+    def save(self, commit=True):
+        ticket = super().save(commit=False)
+        ticket.created = timezone.now()
+        ticket.reporter = self.user
+
+        if commit:
+            ticket.save()
+
+        return ticket
+
+
+class TicketChangeForm(forms.ModelForm):
+    title = forms.CharField(disabled=True)
+    created = forms.DateTimeField(disabled=True)
+
+    class Meta:
+        model = Ticket
+        fields = ("title", "created", "priority", "description", "status")
+
+    def __init__(self, *args, **kwargs):
+        self.user = kwargs.pop('user', None)
+        super(TicketChangeForm, self).__init__(*args, **kwargs)
+
+    def clean(self):
+        cleaned_data = super().clean()
+        cleaned_description = clean_field(self, cleaned_data, "description", self.user)
+        cleaned_data["description"] = cleaned_description
+
+        return cleaned_data
+
+
 class OnCallChangeForm(forms.Form):
     engineer = forms.ModelChoiceField(
         label="Engineer Choices", queryset=EngineerUser.objects.all(), required=True)
 
 
-def clean_field(self, cleaned_data, field_name):
+def clean_field(self, cleaned_data, field_name, user=None):
     field_data = cleaned_data.get(field_name)
 
     if field_data:
-        is_sql_injection = sql_injection_check(field_data)
-        is_cross_site_scripting = cross_site_scripting_check(field_data)
+        is_sql_injection = sql_injection_check(field_data, user)
+        is_cross_site_scripting = cross_site_scripting_check(field_data, user)
         if is_sql_injection or is_cross_site_scripting:
             self.add_error(field_name, f'Invalid {field_name.replace("_", " ")}')
 
@@ -144,16 +167,26 @@ def clean_field(self, cleaned_data, field_name):
     return field_data
 
 
-def sql_injection_check(input_string):
-    sql_keywords = [";", "--", "DROP", "DELETE", "UPDATE", "INSERT", "SELECT"]
+def sql_injection_check(input_string, user=None):
+    sql_keywords = ["DROP", "DELETE", "UPDATE", "INSERT", "SELECT"]
 
     for keyword in sql_keywords:
         if keyword in input_string:
+            if user:
+                username = user.username
+            else:
+                username = "Anonymous"
+            logger.warning('SQL Injection attempt detected', extra={'username': username})
             return True
     return False
 
 
-def cross_site_scripting_check(input_string):
+def cross_site_scripting_check(input_string, user=None):
     if '<script>' in input_string:
+        if user:
+            username = user.username
+        else:
+            username = "Anonymous"
+        logger.warning('Cross-Site Scripting attempt detected', extra={'username': username})
         return True
     return False

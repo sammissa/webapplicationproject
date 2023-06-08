@@ -24,6 +24,7 @@ from django.urls import reverse
 from django.utils import timezone
 from pytz import UTC
 
+from application import views
 from application.forms import TicketCreationForm, TicketChangeForm, EngineerUserCreationForm, OnCallChangeForm
 from application.models import EngineerUser, Ticket
 
@@ -67,190 +68,40 @@ class CustomTestCase(TestCase):
                                               is_on_call=True)
 
 
-class TicketCreationFormTestCase(CustomTestCase):
-    def test_empty_form_is_not_valid(self):
-        form = TicketCreationForm()
+class EngineerUserTestCase(CustomTestCase):
+    def test_engineer_user(self):
+        user = EngineerUser.objects.create_user(username="testuser",
+                                                email="testuser@qa.com",
+                                                password=PASSWORD,
+                                                first_name="test",
+                                                last_name="user")
+        self.assertEqual(user.username, "testuser")
+        self.assertEqual(user.email, "testuser@qa.com")
+        self.assertEqual(user.get_full_name(), "test user")
+        self.assertEqual(user.is_on_call, False)
+        self.assertEqual(user.is_superuser, False)
+        self.assertEqual(user.is_staff, False)
 
-        self.assertFalse(form.is_valid())
+        # Assert that the password is correctly hashed
+        self.assertTrue(check_password(PASSWORD, user.password))
 
-    def test_form_is_not_valid_without_title(self):
-        form = TicketCreationForm(
-            data={"priority": PRIORITY, "description": DESCRIPTION, "status": STATUS})
+    def test_admin_engineer_user(self):
+        admin_user = EngineerUser.objects.create_superuser(username="testadmin",
+                                                           email="testadmin@qa.com",
+                                                           password=PASSWORD,
+                                                           first_name="test",
+                                                           last_name="admin",
+                                                           is_on_call=True)
 
-        self.assertFalse(form.is_valid())
+        self.assertEqual(admin_user.username, "testadmin")
+        self.assertEqual(admin_user.email, "testadmin@qa.com")
+        self.assertEqual(admin_user.get_full_name(), "test admin")
+        self.assertEqual(admin_user.is_on_call, True)
+        self.assertEqual(admin_user.is_superuser, True)
+        self.assertEqual(admin_user.is_staff, True)
 
-    def test_form_is_not_valid_without_description(self):
-        form = TicketCreationForm(data={"title": TITLE, "priority": PRIORITY, "status": STATUS})
-
-        self.assertFalse(form.is_valid())
-
-    def test_form_is_not_valid_without_priority(self):
-        form = TicketCreationForm(data={"title": TITLE,
-                                      "description": DESCRIPTION,
-                                      "status": STATUS})
-
-        self.assertFalse(form.is_valid())
-
-    def test_form_is_valid(self):
-        form = TicketCreationForm(data={"title": TITLE,
-                                      "priority": PRIORITY,
-                                      "description": DESCRIPTION,
-                                      "status": STATUS})
-
-        self.assertTrue(form.is_valid())
-
-    def test_form_is_not_valid_if_title_exists(self):
-        user = EngineerUser.objects.get(pk=1)
-        Ticket.objects.create(title=TITLE,
-                              created=TIME,
-                              priority=PRIORITY,
-                              description=DESCRIPTION,
-                              status=STATUS,
-                              reporter=user)
-
-        form = TicketCreationForm(data={"title": TITLE,
-                                      "priority": PRIORITY,
-                                      "description": DESCRIPTION,
-                                      "status": STATUS,
-                                      "reporter": user})
-
-        self.assertFalse(form.is_valid())
-
-    def test_form_title_against_xss(self):
-        form = TicketCreationForm(data={"title": XSS_INPUT,
-                                      "priority": PRIORITY,
-                                      "description": DESCRIPTION,
-                                      "status": STATUS})
-
-        # Check that the form is not valid
-        self.assertFalse(form.is_valid())
-
-        # Check that the title field in the form has a validation error
-        self.assertTrue('title' in form.errors)
-
-        # Check that the error message is as expected
-        expected_error_message = 'Invalid title'
-        self.assertEqual(form.errors['title'][0], expected_error_message)
-
-    def test_form_title_against_sql_injection(self):
-        form = TicketCreationForm(data={"title": SQL_INPUT,
-                                      "priority": PRIORITY,
-                                      "description": DESCRIPTION,
-                                      "status": STATUS})
-
-        # Check that the form is not valid
-        self.assertFalse(form.is_valid())
-
-        # Check that the title field in the form has a validation error
-        self.assertTrue('title' in form.errors)
-
-        # Check that the error message is as expected
-        expected_error_message = 'Invalid title'
-        self.assertEqual(form.errors['title'][0], expected_error_message)
-
-    def test_form_description_against_xss(self):
-        form = TicketCreationForm(data={"title": TITLE,
-                                      "priority": PRIORITY,
-                                      "description": XSS_INPUT,
-                                      "status": STATUS})
-
-        # Check that the form is not valid
-        self.assertFalse(form.is_valid())
-
-        # Check that the description field in the form has a validation error
-        self.assertTrue('description' in form.errors)
-
-        # Check that the error message is as expected
-        expected_error_message = 'Invalid description'
-        self.assertEqual(form.errors['description'][0], expected_error_message)
-
-    def test_form_description_against_sql_injection(self):
-        form = TicketCreationForm(data={"title": TITLE,
-                                      "priority": PRIORITY,
-                                      "description": SQL_INPUT,
-                                      "status": STATUS})
-
-        # Check that the form is not valid
-        self.assertFalse(form.is_valid())
-
-        # Check that the description field in the form has a validation error
-        self.assertTrue('description' in form.errors)
-
-        # Check that the error message is as expected
-        expected_error_message = 'Invalid description'
-        self.assertEqual(form.errors['description'][0], expected_error_message)
-
-
-class TicketChangeFormTestCase(CustomTestCase):
-    def test_form_is_not_valid_without_description(self):
-        user = EngineerUser.objects.get(pk=1)
-        ticket = Ticket.objects.create(title=TITLE,
-                                       created=TIME,
-                                       priority=PRIORITY,
-                                       description=DESCRIPTION,
-                                       status=STATUS,
-                                       reporter=user)
-        form = TicketChangeForm(instance=ticket, data={"priority": PRIORITY, "status": STATUS})
-
-        self.assertFalse(form.is_valid())
-
-    def test_form_is_valid(self):
-        user = EngineerUser.objects.get(pk=1)
-        ticket = Ticket.objects.create(title=TITLE,
-                                       created=TIME,
-                                       priority=PRIORITY,
-                                       description=DESCRIPTION,
-                                       status=STATUS,
-                                       reporter=user)
-        form = TicketChangeForm(instance=ticket, data={"priority": PRIORITY,
-                                                     "description": "New Description",
-                                                     "status": STATUS})
-
-        self.assertTrue(form.is_valid())
-
-    def test_form_description_against_xss(self):
-        user = EngineerUser.objects.get(pk=1)
-        ticket = Ticket.objects.create(title=TITLE,
-                                       created=TIME,
-                                       priority=PRIORITY,
-                                       description=DESCRIPTION,
-                                       status=STATUS,
-                                       reporter=user)
-        form = TicketChangeForm(instance=ticket, data={"priority": PRIORITY,
-                                                     "description": XSS_INPUT,
-                                                     "status": STATUS})
-
-        # Check that the form is not valid
-        self.assertFalse(form.is_valid())
-
-        # Check that the description field in the form has a validation error
-        self.assertTrue('description' in form.errors)
-
-        # Check that the error message is as expected
-        expected_error_message = 'Invalid description'
-        self.assertEqual(form.errors['description'][0], expected_error_message)
-
-    def test_form_description_against_sql_injection(self):
-        user = EngineerUser.objects.get(pk=1)
-        ticket = Ticket.objects.create(title=TITLE,
-                                       created=TIME,
-                                       priority=PRIORITY,
-                                       description=DESCRIPTION,
-                                       status=STATUS,
-                                       reporter=user)
-        form = TicketChangeForm(instance=ticket, data={"priority": PRIORITY,
-                                                     "description": SQL_INPUT,
-                                                     "status": STATUS})
-
-        # Check that the form is not valid
-        self.assertFalse(form.is_valid())
-
-        # Check that the description field in the form has a validation error
-        self.assertTrue('description' in form.errors)
-
-        # Check that the error message is as expected
-        expected_error_message = 'Invalid description'
-        self.assertEqual(form.errors['description'][0], expected_error_message)
+        # Assert that the password is correctly hashed
+        self.assertTrue(check_password(PASSWORD, admin_user.password))
 
 
 class EngineerUserCreationFormTestCase(CustomTestCase):
@@ -406,59 +257,6 @@ class EngineerUserCreationFormTestCase(CustomTestCase):
         self.assertEqual(form.errors['last_name'][0], expected_error_message)
 
 
-class OnCallChangeFormTestCase(CustomTestCase):
-    def test_form_is_not_valid_without_choice(self):
-        form = OnCallChangeForm()
-
-        self.assertFalse(form.is_valid())
-
-    def test_form_is_not_valid_when_choice_is_not_valid(self):
-        form = OnCallChangeForm(data={"engineer": 3})
-
-        self.assertFalse(form.is_valid())
-
-    def test_form_is_valid(self):
-        form = OnCallChangeForm(data={"engineer": 1})
-
-        self.assertTrue(form.is_valid())
-
-
-class EngineerUserTestCase(CustomTestCase):
-    def test_engineer_user(self):
-        user = EngineerUser.objects.create_user(username="testuser",
-                                                email="testuser@qa.com",
-                                                password=PASSWORD,
-                                                first_name="test",
-                                                last_name="user")
-        self.assertEqual(user.username, "testuser")
-        self.assertEqual(user.email, "testuser@qa.com")
-        self.assertEqual(user.get_full_name(), "test user")
-        self.assertEqual(user.is_on_call, False)
-        self.assertEqual(user.is_superuser, False)
-        self.assertEqual(user.is_staff, False)
-
-        # Assert that the password is correctly hashed
-        self.assertTrue(check_password(PASSWORD, user.password))
-
-    def test_admin_engineer_user(self):
-        admin_user = EngineerUser.objects.create_superuser(username="testadmin",
-                                                           email="testadmin@qa.com",
-                                                           password=PASSWORD,
-                                                           first_name="test",
-                                                           last_name="admin",
-                                                           is_on_call=True)
-
-        self.assertEqual(admin_user.username, "testadmin")
-        self.assertEqual(admin_user.email, "testadmin@qa.com")
-        self.assertEqual(admin_user.get_full_name(), "test admin")
-        self.assertEqual(admin_user.is_on_call, True)
-        self.assertEqual(admin_user.is_superuser, True)
-        self.assertEqual(admin_user.is_staff, True)
-
-        # Assert that the password is correctly hashed
-        self.assertTrue(check_password(PASSWORD, admin_user.password))
-
-
 class EngineerUserAdminTestCase(CustomTestCase):
     def test_save_model(self):
         user = EngineerUser.objects.get(pk=1)
@@ -604,6 +402,227 @@ class TicketTestCase(CustomTestCase):
         self.assertEqual(ticket.reporter.is_on_call, False)
 
 
+class TicketCreationFormTestCase(CustomTestCase):
+    def test_empty_form_is_not_valid(self):
+        form = TicketCreationForm()
+
+        self.assertFalse(form.is_valid())
+
+    def test_form_is_not_valid_without_title(self):
+        form = TicketCreationForm(
+            data={"priority": PRIORITY, "description": DESCRIPTION, "status": STATUS})
+
+        self.assertFalse(form.is_valid())
+
+    def test_form_is_not_valid_without_description(self):
+        form = TicketCreationForm(data={"title": TITLE, "priority": PRIORITY, "status": STATUS})
+
+        self.assertFalse(form.is_valid())
+
+    def test_form_is_not_valid_without_priority(self):
+        form = TicketCreationForm(data={"title": TITLE,
+                                        "description": DESCRIPTION,
+                                        "status": STATUS})
+
+        self.assertFalse(form.is_valid())
+
+    def test_form_is_valid(self):
+        form = TicketCreationForm(data={"title": TITLE,
+                                        "priority": PRIORITY,
+                                        "description": DESCRIPTION,
+                                        "status": STATUS})
+
+        self.assertTrue(form.is_valid())
+
+    def test_form_is_not_valid_if_title_exists(self):
+        user = EngineerUser.objects.get(pk=1)
+        Ticket.objects.create(title=TITLE,
+                              created=TIME,
+                              priority=PRIORITY,
+                              description=DESCRIPTION,
+                              status=STATUS,
+                              reporter=user)
+
+        form = TicketCreationForm(data={"title": TITLE,
+                                        "priority": PRIORITY,
+                                        "description": DESCRIPTION,
+                                        "status": STATUS,
+                                        "reporter": user})
+
+        self.assertFalse(form.is_valid())
+
+    def test_form_title_against_xss(self):
+        form = TicketCreationForm(data={"title": XSS_INPUT,
+                                        "priority": PRIORITY,
+                                        "description": DESCRIPTION,
+                                        "status": STATUS})
+
+        # Check that the form is not valid
+        self.assertFalse(form.is_valid())
+
+        # Check that the title field in the form has a validation error
+        self.assertTrue('title' in form.errors)
+
+        # Check that the error message is as expected
+        expected_error_message = 'Invalid title'
+        self.assertEqual(form.errors['title'][0], expected_error_message)
+
+    def test_form_title_against_sql_injection(self):
+        form = TicketCreationForm(data={"title": SQL_INPUT,
+                                        "priority": PRIORITY,
+                                        "description": DESCRIPTION,
+                                        "status": STATUS})
+
+        # Check that the form is not valid
+        self.assertFalse(form.is_valid())
+
+        # Check that the title field in the form has a validation error
+        self.assertTrue('title' in form.errors)
+
+        # Check that the error message is as expected
+        expected_error_message = 'Invalid title'
+        self.assertEqual(form.errors['title'][0], expected_error_message)
+
+    def test_form_description_against_xss(self):
+        form = TicketCreationForm(data={"title": TITLE,
+                                        "priority": PRIORITY,
+                                        "description": XSS_INPUT,
+                                        "status": STATUS})
+
+        # Check that the form is not valid
+        self.assertFalse(form.is_valid())
+
+        # Check that the description field in the form has a validation error
+        self.assertTrue('description' in form.errors)
+
+        # Check that the error message is as expected
+        expected_error_message = 'Invalid description'
+        self.assertEqual(form.errors['description'][0], expected_error_message)
+
+    def test_form_description_against_sql_injection(self):
+        form = TicketCreationForm(data={"title": TITLE,
+                                        "priority": PRIORITY,
+                                        "description": SQL_INPUT,
+                                        "status": STATUS})
+
+        # Check that the form is not valid
+        self.assertFalse(form.is_valid())
+
+        # Check that the description field in the form has a validation error
+        self.assertTrue('description' in form.errors)
+
+        # Check that the error message is as expected
+        expected_error_message = 'Invalid description'
+        self.assertEqual(form.errors['description'][0], expected_error_message)
+
+
+class TicketChangeFormTestCase(CustomTestCase):
+    def test_form_is_not_valid_without_description(self):
+        user = EngineerUser.objects.get(pk=1)
+        ticket = Ticket.objects.create(title=TITLE,
+                                       created=TIME,
+                                       priority=PRIORITY,
+                                       description=DESCRIPTION,
+                                       status=STATUS,
+                                       reporter=user)
+        form = TicketChangeForm(instance=ticket, data={"priority": PRIORITY, "status": STATUS})
+
+        self.assertFalse(form.is_valid())
+
+    def test_form_is_valid(self):
+        user = EngineerUser.objects.get(pk=1)
+        ticket = Ticket.objects.create(title=TITLE,
+                                       created=TIME,
+                                       priority=PRIORITY,
+                                       description=DESCRIPTION,
+                                       status=STATUS,
+                                       reporter=user)
+        form = TicketChangeForm(instance=ticket, data={"priority": PRIORITY,
+                                                       "description": "New Description",
+                                                       "status": STATUS})
+
+        self.assertTrue(form.is_valid())
+
+    def test_form_description_against_xss(self):
+        user = EngineerUser.objects.get(pk=1)
+        ticket = Ticket.objects.create(title=TITLE,
+                                       created=TIME,
+                                       priority=PRIORITY,
+                                       description=DESCRIPTION,
+                                       status=STATUS,
+                                       reporter=user)
+        form = TicketChangeForm(instance=ticket, data={"priority": PRIORITY,
+                                                       "description": XSS_INPUT,
+                                                       "status": STATUS})
+
+        # Check that the form is not valid
+        self.assertFalse(form.is_valid())
+
+        # Check that the description field in the form has a validation error
+        self.assertTrue('description' in form.errors)
+
+        # Check that the error message is as expected
+        expected_error_message = 'Invalid description'
+        self.assertEqual(form.errors['description'][0], expected_error_message)
+
+    def test_form_description_against_sql_injection(self):
+        user = EngineerUser.objects.get(pk=1)
+        ticket = Ticket.objects.create(title=TITLE,
+                                       created=TIME,
+                                       priority=PRIORITY,
+                                       description=DESCRIPTION,
+                                       status=STATUS,
+                                       reporter=user)
+        form = TicketChangeForm(instance=ticket, data={"priority": PRIORITY,
+                                                       "description": SQL_INPUT,
+                                                       "status": STATUS})
+
+        # Check that the form is not valid
+        self.assertFalse(form.is_valid())
+
+        # Check that the description field in the form has a validation error
+        self.assertTrue('description' in form.errors)
+
+        # Check that the error message is as expected
+        expected_error_message = 'Invalid description'
+        self.assertEqual(form.errors['description'][0], expected_error_message)
+
+
+class TicketAdminTestCase(CustomTestCase):
+    def test_save_model(self):
+        self.client.login(username='admin', password=PASSWORD)
+        data = {
+            'title': 'test title',
+            'priority': PRIORITY,
+            'description': DESCRIPTION,
+            'status': STATUS
+        }
+        request = self.client.post('/admin/application/ticket/add/', data=data)
+        ticket = Ticket.objects.get(title='test title')
+        user = EngineerUser.objects.get(pk=2)
+        self.assertEqual(ticket.title, 'test title')
+        self.assertEqual(ticket.priority, PRIORITY)
+        self.assertEqual(ticket.reporter, user)
+        self.assertIsNotNone(ticket.created)
+        self.assertEqual(ticket.created.date(), timezone.now().date())
+
+class OnCallChangeFormTestCase(CustomTestCase):
+    def test_form_is_not_valid_without_choice(self):
+        form = OnCallChangeForm()
+
+        self.assertFalse(form.is_valid())
+
+    def test_form_is_not_valid_when_choice_is_not_valid(self):
+        form = OnCallChangeForm(data={"engineer": 3})
+
+        self.assertFalse(form.is_valid())
+
+    def test_form_is_valid(self):
+        form = OnCallChangeForm(data={"engineer": 1})
+
+        self.assertTrue(form.is_valid())
+
+
 class ViewsTestCase(CustomTestCase):
     def test_home_view(self):
         response = self.client.get("")
@@ -627,7 +646,7 @@ class ViewsTestCase(CustomTestCase):
         })
         self.assertEqual(response.status_code, 302)
         messages = [m.message for m in get_messages(response.wsgi_request)]
-        self.assertIn("Registration successful.", messages)
+        self.assertIn(views.REGISTRATION_SUCCESSFUL, messages)
         users = get_user_model().objects.all()
         self.assertEqual(users.count(), 3)
 
@@ -635,7 +654,7 @@ class ViewsTestCase(CustomTestCase):
         response = self.client.post(reverse("register"), data={})
         self.assertEqual(response.status_code, 200)
         messages = [m.message for m in get_messages(response.wsgi_request)]
-        self.assertIn("Unsuccessful registration. Invalid information.", messages)
+        self.assertIn(views.REGISTRATION_UNSUCCESSFUL, messages)
 
     def test_login_view(self):
         response = self.client.get("/login/")
@@ -646,7 +665,7 @@ class ViewsTestCase(CustomTestCase):
         response = self.login_helper()
         self.assertEqual(response.status_code, 302)
         messages = [m.message for m in get_messages(response.wsgi_request)]
-        self.assertIn("You are now logged in as user.", messages)
+        self.assertIn(views.LOGGED_IN, messages)
 
     def test_login_with_invalid_details(self):
         response = self.client.post(reverse("login"), data={})
@@ -680,14 +699,14 @@ class ViewsTestCase(CustomTestCase):
         })
         self.assertEqual(response.status_code, 302)
         messages = [m.message for m in get_messages(response.wsgi_request)]
-        self.assertIn("Ticket: [Title] has been added.", messages)
+        self.assertIn(views.TICKET_CREATED, messages)
 
     def test_create_ticket_with_invalid_details(self):
         self.login_helper()
         response = self.client.post(reverse("ticket_form"), data={})
         self.assertEqual(response.status_code, 200)
         messages = [m.message for m in get_messages(response.wsgi_request)]
-        self.assertIn("Form is not valid.", messages)
+        self.assertIn(views.INVALID_FORM, messages)
 
     def test_set_on_call_view(self):
         response = self.client.get("/set_on_call/")
@@ -779,7 +798,7 @@ class ViewsTestCase(CustomTestCase):
         })
         self.assertEqual(response.status_code, 302)
         messages = [m.message for m in get_messages(response.wsgi_request)]
-        self.assertIn("Ticket updated successfully.", messages)
+        self.assertIn(views.TICKET_UPDATED, messages)
 
         response = self.client.get(reverse("tickets"))
         edited_ticket_list = response.context["ticket_list"]
@@ -796,7 +815,7 @@ class ViewsTestCase(CustomTestCase):
         response = self.client.get(reverse("edit_ticket", args=(0,)))
         self.assertEqual(response.status_code, 200)
         messages = [m.message for m in get_messages(response.wsgi_request)]
-        self.assertIn("Ticket does not exist.", messages)
+        self.assertIn(views.TICKET_MISSING, messages)
 
     def test_edit_ticket_view_against_xss(self):
         user = EngineerUser.objects.get(pk=1)
@@ -827,7 +846,7 @@ class ViewsTestCase(CustomTestCase):
         })
         self.assertEqual(response.status_code, 200)
         messages = [m.message for m in get_messages(response.wsgi_request)]
-        self.assertIn("Form is not valid.", messages)
+        self.assertIn(views.INVALID_FORM, messages)
 
     def test_edit_ticket_view_against_sql_injection(self):
         user = EngineerUser.objects.get(pk=1)
@@ -858,8 +877,7 @@ class ViewsTestCase(CustomTestCase):
         })
         self.assertEqual(response.status_code, 200)
         messages = [m.message for m in get_messages(response.wsgi_request)]
-        self.assertIn("Form is not valid.", messages)
-
+        self.assertIn(views.INVALID_FORM, messages)
 
     def test_delete_ticket_view(self):
         user = EngineerUser.objects.get(pk=1)
@@ -887,7 +905,7 @@ class ViewsTestCase(CustomTestCase):
         response = self.client.post(reverse("delete_ticket", args=(ticket.id,)))
         self.assertEqual(response.status_code, 302)
         messages = [m.message for m in get_messages(response.wsgi_request)]
-        self.assertIn("Ticket deleted successfully.", messages)
+        self.assertIn(views.TICKET_DELETED, messages)
 
         response = self.client.get(reverse("tickets"))
         ticket_list = response.context["ticket_list"]

@@ -1,7 +1,8 @@
 from django.apps import AppConfig
 
 
-class ApplicationConfig(AppConfig):
+class LoggerConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'application'
-    verbose_name = 'App'
+    name = 'logger'
+    verbose_name = 'Logs'
+

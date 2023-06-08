@@ -12,3 +12,4 @@ django-crispy_forms==2.0
 crispy-bootstrap4==2022.1
 coverage==7.2.7
 pytest-django==4.5.2
+django-db-logger==0.1.12
