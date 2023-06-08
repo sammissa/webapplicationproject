@@ -16,16 +16,18 @@ References:
     Moppag (2017) [online] python - How can I unit test django messages?, Stack Overflow. Available at:
     https://stackoverflow.com/a/46865530 (Accessed: 21 April 2022).
 """
+from django.contrib.admin import AdminSite
 from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import check_password
 from django.contrib.messages import get_messages
-from django.test import TestCase
+from django.test import TestCase, RequestFactory
 from django.urls import reverse
 from django.utils import timezone
 from pytz import UTC
 
 from application import views
-from application.forms import TicketCreationForm, TicketChangeForm, EngineerUserCreationForm, OnCallChangeForm
+from application.admin import TicketAdmin
+from application.forms import EngineerUserCreationForm, OnCallChangeForm, TicketCreationForm, TicketChangeForm
 from application.models import EngineerUser, Ticket
 
 # Test values for Register form fields
@@ -589,7 +591,27 @@ class TicketChangeFormTestCase(CustomTestCase):
 
 
 class TicketAdminTestCase(CustomTestCase):
+    def test_get_form(self):
+        request_factory = RequestFactory()
+        request = request_factory.get('/admin/application/ticket/add/')
+        ticket_admin = TicketAdmin(Ticket, AdminSite())
+
+        form = ticket_admin.get_form(request, obj=None)
+        self.assertTrue(issubclass(form, TicketCreationForm))
+
+        user = EngineerUser.objects.get(pk=1)
+        ticket = Ticket.objects.create(title=TITLE,
+                                       created=TIME,
+                                       priority=PRIORITY,
+                                       description=DESCRIPTION,
+                                       status=STATUS,
+                                       reporter=user)
+
+        form = ticket_admin.get_form(request, obj=ticket)
+        self.assertTrue(issubclass(form, TicketChangeForm))
+
     def test_save_model(self):
+        admin_user = EngineerUser.objects.get(pk=2)
         self.client.login(username='admin', password=PASSWORD)
         data = {
             'title': 'test title',
@@ -597,14 +619,16 @@ class TicketAdminTestCase(CustomTestCase):
             'description': DESCRIPTION,
             'status': STATUS
         }
-        request = self.client.post('/admin/application/ticket/add/', data=data)
+
+        self.client.post('/admin/application/ticket/add/', data=data)
         ticket = Ticket.objects.get(title='test title')
-        user = EngineerUser.objects.get(pk=2)
+
         self.assertEqual(ticket.title, 'test title')
         self.assertEqual(ticket.priority, PRIORITY)
-        self.assertEqual(ticket.reporter, user)
+        self.assertEqual(ticket.reporter, admin_user)
         self.assertIsNotNone(ticket.created)
         self.assertEqual(ticket.created.date(), timezone.now().date())
+
 
 class OnCallChangeFormTestCase(CustomTestCase):
     def test_form_is_not_valid_without_choice(self):

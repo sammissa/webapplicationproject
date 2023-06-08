@@ -1,7 +1,6 @@
 from __future__ import unicode_literals
 
 from django.contrib import admin
-from django.contrib.admin.models import LogEntry
 from django.contrib.auth.models import Group
 from django_db_logger.admin import StatusLogAdmin
 from django_db_logger.models import StatusLog
@@ -29,7 +28,6 @@ class CustomStatusLogAdmin(StatusLogAdmin):
 @admin.register(CustomLogEntry)
 class LogEntryAdmin(admin.ModelAdmin):
     date_hierarchy = 'action_time'
-    readonly_fields = [field.name for field in LogEntry._meta.fields]
     list_display = ('action_time', 'user', 'content_type', 'object_repr', 'action_flag')
     list_filter = ('action_flag', 'user', 'content_type')
     search_fields = ('object_repr', 'change_message')
