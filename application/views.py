@@ -141,9 +141,9 @@ def create_ticket_request(request):
 def edit_ticket_request(request, pk):
     try:
         instance = Ticket.objects.get(pk=pk)
-    except Ticket.DoesNotExist as e:
+    except Ticket.DoesNotExist:
         messages.error(request, TICKET_MISSING)
-        logger.exception(e, extra={'username': request.user.username})
+        logger.exception(TICKET_MISSING, extra={'username': request.user.username})
         return render(request=request, template_name="application/tickets.html")
     form = TicketChangeForm(data=request.POST or None, instance=instance, user=request.user)
     if request.method == "POST":

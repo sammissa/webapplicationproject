@@ -33,6 +33,9 @@ from django.utils.html import escape
 
 from application.models import Ticket, EngineerUser
 
+XSS_MSG = 'Cross-Site Scripting attempt detected'
+SQL_MSG = 'SQL Injection attempt detected'
+
 logger = logging.getLogger()
 
 
@@ -176,7 +179,7 @@ def sql_injection_check(input_string, user=None):
                 username = user.username
             else:
                 username = "Anonymous"
-            logger.warning('SQL Injection attempt detected', extra={'username': username})
+            logger.warning(SQL_MSG, extra={'username': username})
             return True
     return False
 
@@ -187,6 +190,6 @@ def cross_site_scripting_check(input_string, user=None):
             username = user.username
         else:
             username = "Anonymous"
-        logger.warning('Cross-Site Scripting attempt detected', extra={'username': username})
+        logger.warning(XSS_MSG, extra={'username': username})
         return True
     return False

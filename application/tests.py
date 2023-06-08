@@ -16,6 +16,8 @@ References:
     Moppag (2017) [online] python - How can I unit test django messages?, Stack Overflow. Available at:
     https://stackoverflow.com/a/46865530 (Accessed: 21 April 2022).
 """
+import logging
+
 from django.contrib.admin import AdminSite
 from django.contrib.auth import get_user_model
 from django.contrib.auth.hashers import check_password
@@ -25,10 +27,11 @@ from django.urls import reverse
 from django.utils import timezone
 from pytz import UTC
 
-from application import views
+from application import views, forms
 from application.admin import TicketAdmin
 from application.forms import EngineerUserCreationForm, OnCallChangeForm, TicketCreationForm, TicketChangeForm
 from application.models import EngineerUser, Ticket
+from logger.models import CustomStatusLog
 
 # Test values for Register form fields
 FIRST_NAME = "John"
@@ -204,6 +207,9 @@ class EngineerUserCreationFormTestCase(CustomTestCase):
         expected_error_message = 'Invalid first name'
         self.assertEqual(form.errors['first_name'][0], expected_error_message)
 
+        log_entry = CustomStatusLog.objects.get(level=logging.WARNING)
+        self.assertEqual(log_entry.msg, forms.XSS_MSG)
+
     def test_form_first_name_against_sql_injection(self):
         form = EngineerUserCreationForm(data={"first_name": SQL_INPUT,
                                               "last_name": LAST_NAME,
@@ -221,6 +227,9 @@ class EngineerUserCreationFormTestCase(CustomTestCase):
         # Check that the error message is as expected
         expected_error_message = 'Invalid first name'
         self.assertEqual(form.errors['first_name'][0], expected_error_message)
+
+        log_entry = CustomStatusLog.objects.get(level=logging.WARNING)
+        self.assertEqual(log_entry.msg, forms.SQL_MSG)
 
     def test_form_last_name_against_xss(self):
         form = EngineerUserCreationForm(data={"first_name": FIRST_NAME,
@@ -240,6 +249,9 @@ class EngineerUserCreationFormTestCase(CustomTestCase):
         expected_error_message = 'Invalid last name'
         self.assertEqual(form.errors['last_name'][0], expected_error_message)
 
+        log_entry = CustomStatusLog.objects.get(level=logging.WARNING)
+        self.assertEqual(log_entry.msg, forms.XSS_MSG)
+
     def test_form_last_name_against_sql_injection(self):
         form = EngineerUserCreationForm(data={"first_name": FIRST_NAME,
                                               "last_name": SQL_INPUT,
@@ -257,6 +269,9 @@ class EngineerUserCreationFormTestCase(CustomTestCase):
         # Check that the error message is as expected
         expected_error_message = 'Invalid last name'
         self.assertEqual(form.errors['last_name'][0], expected_error_message)
+
+        log_entry = CustomStatusLog.objects.get(level=logging.WARNING)
+        self.assertEqual(log_entry.msg, forms.SQL_MSG)
 
 
 class EngineerUserAdminTestCase(CustomTestCase):
@@ -315,6 +330,9 @@ class EngineerUserAdminTestCase(CustomTestCase):
         updated_user = EngineerUser.objects.get(pk=user.id)
         self.assertEqual(updated_user.first_name, user.first_name)
 
+        log_entry = CustomStatusLog.objects.get(level=logging.WARNING)
+        self.assertEqual(log_entry.msg, forms.XSS_MSG)
+
     def test_save_model_first_name_against_sql_injection(self):
         user = EngineerUser.objects.get(pk=1)
         admin_user = EngineerUser.objects.get(pk=2)
@@ -336,6 +354,9 @@ class EngineerUserAdminTestCase(CustomTestCase):
         }
         response = self.client.post(change_url, updated_data, follow=True)
         self.assertEqual(response.status_code, 200)
+
+        log_entry = CustomStatusLog.objects.get(level=logging.WARNING)
+        self.assertEqual(log_entry.msg, forms.SQL_MSG)
 
     def test_save_model_last_name_against_xss(self):
         user = EngineerUser.objects.get(pk=1)
@@ -362,6 +383,9 @@ class EngineerUserAdminTestCase(CustomTestCase):
         updated_user = EngineerUser.objects.get(pk=user.id)
         self.assertEqual(updated_user.last_name, user.last_name)
 
+        log_entry = CustomStatusLog.objects.get(level=logging.WARNING)
+        self.assertEqual(log_entry.msg, forms.XSS_MSG)
+
     def test_save_model_last_name_against_sql_injection(self):
         user = EngineerUser.objects.get(pk=1)
         admin_user = EngineerUser.objects.get(pk=2)
@@ -383,6 +407,9 @@ class EngineerUserAdminTestCase(CustomTestCase):
         }
         response = self.client.post(change_url, updated_data, follow=True)
         self.assertEqual(response.status_code, 200)
+
+        log_entry = CustomStatusLog.objects.get(level=logging.WARNING)
+        self.assertEqual(log_entry.msg, forms.SQL_MSG)
 
 
 class TicketTestCase(CustomTestCase):
@@ -469,6 +496,9 @@ class TicketCreationFormTestCase(CustomTestCase):
         expected_error_message = 'Invalid title'
         self.assertEqual(form.errors['title'][0], expected_error_message)
 
+        log_entry = CustomStatusLog.objects.get(level=logging.WARNING)
+        self.assertEqual(log_entry.msg, forms.XSS_MSG)
+
     def test_form_title_against_sql_injection(self):
         form = TicketCreationForm(data={"title": SQL_INPUT,
                                         "priority": PRIORITY,
@@ -484,6 +514,9 @@ class TicketCreationFormTestCase(CustomTestCase):
         # Check that the error message is as expected
         expected_error_message = 'Invalid title'
         self.assertEqual(form.errors['title'][0], expected_error_message)
+
+        log_entry = CustomStatusLog.objects.get(level=logging.WARNING)
+        self.assertEqual(log_entry.msg, forms.SQL_MSG)
 
     def test_form_description_against_xss(self):
         form = TicketCreationForm(data={"title": TITLE,
@@ -501,6 +534,9 @@ class TicketCreationFormTestCase(CustomTestCase):
         expected_error_message = 'Invalid description'
         self.assertEqual(form.errors['description'][0], expected_error_message)
 
+        log_entry = CustomStatusLog.objects.get(level=logging.WARNING)
+        self.assertEqual(log_entry.msg, forms.XSS_MSG)
+
     def test_form_description_against_sql_injection(self):
         form = TicketCreationForm(data={"title": TITLE,
                                         "priority": PRIORITY,
@@ -516,6 +552,9 @@ class TicketCreationFormTestCase(CustomTestCase):
         # Check that the error message is as expected
         expected_error_message = 'Invalid description'
         self.assertEqual(form.errors['description'][0], expected_error_message)
+
+        log_entry = CustomStatusLog.objects.get(level=logging.WARNING)
+        self.assertEqual(log_entry.msg, forms.SQL_MSG)
 
 
 class TicketChangeFormTestCase(CustomTestCase):
@@ -567,6 +606,9 @@ class TicketChangeFormTestCase(CustomTestCase):
         expected_error_message = 'Invalid description'
         self.assertEqual(form.errors['description'][0], expected_error_message)
 
+        log_entry = CustomStatusLog.objects.get(level=logging.WARNING)
+        self.assertEqual(log_entry.msg, forms.XSS_MSG)
+
     def test_form_description_against_sql_injection(self):
         user = EngineerUser.objects.get(pk=1)
         ticket = Ticket.objects.create(title=TITLE,
@@ -588,6 +630,9 @@ class TicketChangeFormTestCase(CustomTestCase):
         # Check that the error message is as expected
         expected_error_message = 'Invalid description'
         self.assertEqual(form.errors['description'][0], expected_error_message)
+
+        log_entry = CustomStatusLog.objects.get(level=logging.WARNING)
+        self.assertEqual(log_entry.msg, forms.SQL_MSG)
 
 
 class TicketAdminTestCase(CustomTestCase):
@@ -674,11 +719,17 @@ class ViewsTestCase(CustomTestCase):
         users = get_user_model().objects.all()
         self.assertEqual(users.count(), 3)
 
+        log_entry = CustomStatusLog.objects.get(level=logging.INFO)
+        self.assertEqual(log_entry.msg, views.REGISTRATION_SUCCESSFUL)
+
     def test_register_with_invalid_details(self):
         response = self.client.post(reverse("register"), data={})
         self.assertEqual(response.status_code, 200)
         messages = [m.message for m in get_messages(response.wsgi_request)]
         self.assertIn(views.REGISTRATION_UNSUCCESSFUL, messages)
+
+        log_entry = CustomStatusLog.objects.get(level=logging.ERROR)
+        self.assertEqual(log_entry.msg, views.REGISTRATION_UNSUCCESSFUL)
 
     def test_login_view(self):
         response = self.client.get("/login/")
@@ -691,11 +742,17 @@ class ViewsTestCase(CustomTestCase):
         messages = [m.message for m in get_messages(response.wsgi_request)]
         self.assertIn(views.LOGGED_IN, messages)
 
+        log_entry = CustomStatusLog.objects.get(level=logging.INFO)
+        self.assertEqual(log_entry.msg, views.LOGGED_IN)
+
     def test_login_with_invalid_details(self):
         response = self.client.post(reverse("login"), data={})
         self.assertEqual(response.status_code, 200)
         messages = [m.message for m in get_messages(response.wsgi_request)]
         self.assertIn("Invalid username or password.", messages)
+
+        log_entry = CustomStatusLog.objects.get(level=logging.ERROR)
+        self.assertEqual(log_entry.msg, views.INVALID_CREDENTIALS)
 
     def test_logout(self):
         self.login_helper()
@@ -703,6 +760,9 @@ class ViewsTestCase(CustomTestCase):
         self.assertEqual(response.status_code, 302)
         messages = [m.message for m in get_messages(response.wsgi_request)]
         self.assertIn("You are now logged out.", messages)
+
+        log_entry = CustomStatusLog.objects.get(msg=views.LOGGED_OUT)
+        self.assertEqual(log_entry.level, logging.INFO)
 
     def test_create_ticket_view(self):
         response = self.client.get("/ticket_form/")
@@ -725,12 +785,18 @@ class ViewsTestCase(CustomTestCase):
         messages = [m.message for m in get_messages(response.wsgi_request)]
         self.assertIn(views.TICKET_CREATED, messages)
 
+        log_entry = CustomStatusLog.objects.get(msg=views.TICKET_CREATED)
+        self.assertEqual(log_entry.level, logging.INFO)
+
     def test_create_ticket_with_invalid_details(self):
         self.login_helper()
         response = self.client.post(reverse("ticket_form"), data={})
         self.assertEqual(response.status_code, 200)
         messages = [m.message for m in get_messages(response.wsgi_request)]
         self.assertIn(views.INVALID_FORM, messages)
+
+        log_entry = CustomStatusLog.objects.get(level=logging.ERROR)
+        self.assertEqual(log_entry.msg, views.INVALID_FORM)
 
     def test_set_on_call_view(self):
         response = self.client.get("/set_on_call/")
@@ -750,9 +816,13 @@ class ViewsTestCase(CustomTestCase):
         })
         self.assertEqual(response.status_code, 302)
         messages = [m.message for m in get_messages(response.wsgi_request)]
-        self.assertIn("On call changed to: John Smith.", messages)
+        message = "On call changed to: John Smith."
+        self.assertIn(message, messages)
         engineer = EngineerUser.objects.get(pk=1)
         self.assertTrue(engineer.is_on_call)
+
+        log_entry = CustomStatusLog.objects.get(msg=message)
+        self.assertEqual(log_entry.level, logging.INFO)
 
     def test_tickets_view(self):
         user = EngineerUser.objects.get(pk=1)
@@ -831,6 +901,9 @@ class ViewsTestCase(CustomTestCase):
         self.assertEqual("Edited Description", edited_ticket.description)
         self.assertEqual(Ticket.Status.IP, edited_ticket.status)
 
+        log_entry = CustomStatusLog.objects.get(msg=views.TICKET_UPDATED)
+        self.assertEqual(log_entry.level, logging.INFO)
+
     def test_edit_ticket_view_on_invalid_ticket_id(self):
         self.login_helper()
         response = self.client.get("/tickets/")
@@ -840,6 +913,9 @@ class ViewsTestCase(CustomTestCase):
         self.assertEqual(response.status_code, 200)
         messages = [m.message for m in get_messages(response.wsgi_request)]
         self.assertIn(views.TICKET_MISSING, messages)
+
+        log_entry = CustomStatusLog.objects.get(level=logging.ERROR)
+        self.assertEqual(log_entry.msg, views.TICKET_MISSING)
 
     def test_edit_ticket_view_against_xss(self):
         user = EngineerUser.objects.get(pk=1)
@@ -872,6 +948,9 @@ class ViewsTestCase(CustomTestCase):
         messages = [m.message for m in get_messages(response.wsgi_request)]
         self.assertIn(views.INVALID_FORM, messages)
 
+        log_entry = CustomStatusLog.objects.get(level=logging.WARNING)
+        self.assertEqual(log_entry.msg, forms.XSS_MSG)
+
     def test_edit_ticket_view_against_sql_injection(self):
         user = EngineerUser.objects.get(pk=1)
         Ticket.objects.create(title=TITLE,
@@ -902,6 +981,9 @@ class ViewsTestCase(CustomTestCase):
         self.assertEqual(response.status_code, 200)
         messages = [m.message for m in get_messages(response.wsgi_request)]
         self.assertIn(views.INVALID_FORM, messages)
+
+        log_entry = CustomStatusLog.objects.get(level=logging.WARNING)
+        self.assertEqual(log_entry.msg, forms.SQL_MSG)
 
     def test_delete_ticket_view(self):
         user = EngineerUser.objects.get(pk=1)
@@ -934,6 +1016,9 @@ class ViewsTestCase(CustomTestCase):
         response = self.client.get(reverse("tickets"))
         ticket_list = response.context["ticket_list"]
         self.assertEqual(len(ticket_list), 0)
+
+        log_entry = CustomStatusLog.objects.get(msg=views.TICKET_DELETED)
+        self.assertEqual(log_entry.level, logging.INFO)
 
     def login_helper(self):
         response = self.client.post(reverse("login"), data={
