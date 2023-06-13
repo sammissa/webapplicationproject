@@ -121,7 +121,5 @@ class LogEntryAdminTestCase(TestCase):
 
 class AdminSiteTestCase(TestCase):
     def test_unregister(self):
-        self.admin_site = AdminSite()
-
         self.assertNotIn(StatusLog, admin.site._registry)
         self.assertNotIn(Group, admin.site._registry)
