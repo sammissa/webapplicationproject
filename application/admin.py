@@ -38,15 +38,18 @@ class EngineerUserAdmin(UserAdmin):
 
 @admin.register(Ticket)
 class TicketAdmin(admin.ModelAdmin):
+    add_form = TicketCreationForm
+    form = TicketChangeForm
     list_display = ('title', 'priority', 'status', 'reporter')
     list_filter = ('priority', 'status')
     search_fields = ('title', 'reporter__name')
 
     def get_form(self, request, obj=None, **kwargs):
+        defaults = {}
         if obj is None:
-            return TicketCreationForm
-        else:
-            return TicketChangeForm
+            defaults["form"] = self.add_form
+        defaults.update(kwargs)
+        return super().get_form(request, obj, **defaults)
 
     def save_model(self, request, obj, form, change):
         if not change:
