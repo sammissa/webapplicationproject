@@ -1,0 +1,24 @@
+[
+  {
+    "model": "application.engineeruser",
+    "pk": 1,
+    "fields": {
+      "first_name": "John",
+      "last_name": "Doe",
+      "email": "john.doe@example.com",
+      "is_on_call": true,
+      "username": "johndoe"
+    }
+  },
+  {
+    "model": "application.engineeruser",
+    "pk": 2,
+    "fields": {
+      "first_name": "Jane",
+      "last_name": "Smith",
+      "email": "jane.smith@example.com",
+      "is_on_call": false,
+      "username": "janesmith"
+    }
+  }
+]

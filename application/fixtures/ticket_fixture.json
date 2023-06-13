@@ -1,0 +1,26 @@
+[
+  {
+    "model": "application.ticket",
+    "pk": 1,
+    "fields": {
+      "title": "Fix Bug",
+      "created": "2023-02-01T10:00:00Z",
+      "priority": "M",
+      "description": "Fix the bug reported by the user",
+      "status": "TD",
+      "reporter": 1
+    }
+  },
+  {
+    "model": "application.ticket",
+    "pk": 2,
+    "fields": {
+      "title": "Implement Feature",
+      "created": "2023-03-14T15:30:00Z",
+      "priority": "H",
+      "description": "Implement the new feature based on the requirements",
+      "status": "IP",
+      "reporter": 2
+    }
+  }
+]

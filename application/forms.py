@@ -170,26 +170,24 @@ def clean_field(self, cleaned_data, field_name, user=None):
     return field_data
 
 
-def sql_injection_check(input_string, user=None):
+def sql_injection_check(input_string, user):
     sql_keywords = ["DROP", "DELETE", "UPDATE", "INSERT", "SELECT"]
 
     for keyword in sql_keywords:
         if keyword in input_string:
-            if user:
-                username = user.username
-            else:
-                username = "Anonymous"
-            logger.warning(SQL_MSG, extra={'username': username})
+            logger.warning(SQL_MSG, extra={'username': get_username(user)})
             return True
     return False
 
 
-def cross_site_scripting_check(input_string, user=None):
+def cross_site_scripting_check(input_string, user):
     if '<script>' in input_string:
-        if user:
-            username = user.username
-        else:
-            username = "Anonymous"
-        logger.warning(XSS_MSG, extra={'username': username})
+        logger.warning(XSS_MSG, extra={'username': get_username(user)})
         return True
     return False
+
+
+def get_username(user):
+    if user:
+        return user.username
+    return "Anonymous"

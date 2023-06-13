@@ -1,0 +1,63 @@
+name: Reset Database
+
+on:
+  workflow_dispatch:
+
+jobs:
+  reset:
+    environment: fierce-refuge-23993
+    env:
+      SECRET_KEY: ${{ secrets.SECRET_KEY }}
+      DATABASE_URL: ${{ secrets.DATABASE_URL }}
+      SUPERUSER_USERNAME: ${{ secrets.SUPERUSER_USERNAME }}
+      SUPERUSER_EMAIL: ${{ secrets.SUPERUSER_EMAIL }}
+      SUPERUSER_PASSWORD: ${{ secrets.SUPERUSER_PASSWORD }}
+      SUPERUSER_FIRST_NAME: ${{ secrets.SUPERUSER_FIRST_NAME }}
+      SUPERUSER_LAST_NAME: ${{ secrets.SUPERUSER_LAST_NAME }}
+
+    runs-on: ubuntu-latest
+    strategy:
+      max-parallel: 4
+      matrix:
+        python-version: [ 3.11 ]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v3
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Reset Database
+        run: |
+          python manage.py flush --noinput
+
+      - name: Run Migrations
+        run: |
+          python manage.py migrate
+
+      - name: Insert Data into Tables
+        run: |
+          python manage.py loaddata engineeruser_fixture.json
+          python manage.py loaddata ticket_fixture.json
+
+      - name: Create Superuser
+        run: |
+          python manage.py shell <<EOF
+          from application.models import EngineerUser
+          
+          EngineerUser.objects.create_superuser(
+            username='${{ env.SUPERUSER_USERNAME }}',
+            email='${{ env.SUPERUSER_EMAIL }}', 
+            password='${{ env.SUPERUSER_PASSWORD }}', 
+            first_name='${{ env.SUPERUSER_FIRST_NAME }}', 
+            last_name='${{ env.SUPERUSER_LAST_NAME }}'
+          ) 
+          EOF
