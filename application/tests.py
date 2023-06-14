@@ -817,7 +817,7 @@ class ViewsTestCase(CustomTestCase):
         })
         self.assertEqual(response.status_code, 302)
         messages = [m.message for m in get_messages(response.wsgi_request)]
-        message = "On call changed to: John Smith."
+        message = "On call changed: [John Smith]."
         self.assertIn(message, messages)
         engineer = EngineerUser.objects.get(pk=1)
         self.assertTrue(engineer.is_on_call)

@@ -169,7 +169,7 @@ def set_on_call_request(request):
             engineer = EngineerUser.objects.get(pk=engineer_id)
             engineer.is_on_call = True
             engineer.save(update_fields=["is_on_call"])
-            message = f"On call changed to: {engineer}."
+            message = f"On call changed: [{engineer}]."
             messages.info(request, message)
             logger.info(message, extra={'username': request.user.username})
             return redirect("tickets")
