@@ -36,16 +36,13 @@ from django.views.generic import ListView, DeleteView
 from application.forms import TicketCreationForm, EngineerUserCreationForm, OnCallChangeForm, TicketChangeForm
 from application.models import Ticket, EngineerUser
 
-# Define static message strings
+# Static message strings
 REGISTRATION_SUCCESSFUL = "Registration was successful."
 REGISTRATION_UNSUCCESSFUL = "Registration was unsuccessful."
 INVALID_CREDENTIALS = "Invalid username or password."
 INVALID_FORM = "Invalid form."
 LOGGED_IN = "You are now logged in."
 LOGGED_OUT = "You are now logged out."
-TICKET_CREATED = "Ticket was created."
-TICKET_UPDATED = "Ticket was updated."
-TICKET_DELETED = "Ticket was deleted."
 TICKET_MISSING = "Ticket does not exist."
 
 logger = logging.getLogger()
@@ -74,8 +71,10 @@ class TicketDeleteView(PermissionRequiredMixin, DeleteView):
     context_object_name = "delete_ticket_form"
 
     def get_success_url(self):
-        messages.info(self.request, TICKET_DELETED)
-        logger.info(TICKET_DELETED, extra={'username': self.request.user.username})
+        ticket = self.get_object()
+        message = f"Ticket deleted: [{ticket.title}]."
+        messages.info(self.request, message)
+        logger.info(message, extra={'username': self.request.user.username})
         return reverse_lazy("tickets")
 
 
@@ -129,8 +128,9 @@ def create_ticket_request(request):
     if request.method == "POST":
         if form.is_valid():
             form.save()
-            messages.info(request, TICKET_CREATED)
-            logger.info(TICKET_CREATED, extra={'username': request.user.username})
+            message = f"Ticket created: [{form.cleaned_data['title']}]."
+            messages.info(request, message)
+            logger.info(message, extra={'username': request.user.username})
             return redirect("tickets")
         messages.error(request, INVALID_FORM)
         logger.error(INVALID_FORM, extra={'username': request.user.username})
@@ -149,8 +149,9 @@ def edit_ticket_request(request, pk):
     if request.method == "POST":
         if form.is_valid():
             form.save()
-            messages.info(request, TICKET_UPDATED)
-            logger.info(TICKET_UPDATED, extra={'username': request.user.username})
+            message = f"Ticket updated: [{instance.title}]."
+            messages.info(request, message)
+            logger.info(message, extra={'username': request.user.username})
             return redirect("tickets")
         messages.error(request, INVALID_FORM)
         logger.error(INVALID_FORM, extra={'username': request.user.username})

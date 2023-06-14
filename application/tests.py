@@ -782,10 +782,11 @@ class ViewsTestCase(CustomTestCase):
             "status": STATUS
         })
         self.assertEqual(response.status_code, 302)
+        expected_message = "Ticket created: [Title]."
         messages = [m.message for m in get_messages(response.wsgi_request)]
-        self.assertIn(views.TICKET_CREATED, messages)
+        self.assertIn(expected_message, messages)
 
-        log_entry = CustomStatusLog.objects.get(msg=views.TICKET_CREATED)
+        log_entry = CustomStatusLog.objects.get(msg=expected_message)
         self.assertEqual(log_entry.level, logging.INFO)
 
     def test_create_ticket_with_invalid_details(self):
@@ -891,8 +892,9 @@ class ViewsTestCase(CustomTestCase):
 
         })
         self.assertEqual(response.status_code, 302)
+        expected_message = "Ticket updated: [Test Title]."
         messages = [m.message for m in get_messages(response.wsgi_request)]
-        self.assertIn(views.TICKET_UPDATED, messages)
+        self.assertIn(expected_message, messages)
 
         response = self.client.get(reverse("tickets"))
         edited_ticket_list = response.context["ticket_list"]
@@ -901,7 +903,7 @@ class ViewsTestCase(CustomTestCase):
         self.assertEqual("Edited Description", edited_ticket.description)
         self.assertEqual(Ticket.Status.IP, edited_ticket.status)
 
-        log_entry = CustomStatusLog.objects.get(msg=views.TICKET_UPDATED)
+        log_entry = CustomStatusLog.objects.get(msg=expected_message)
         self.assertEqual(log_entry.level, logging.INFO)
 
     def test_edit_ticket_view_on_invalid_ticket_id(self):
@@ -1010,14 +1012,15 @@ class ViewsTestCase(CustomTestCase):
 
         response = self.client.post(reverse("delete_ticket", args=(ticket.id,)))
         self.assertEqual(response.status_code, 302)
+        expected_message = "Ticket deleted: [Test Title]."
         messages = [m.message for m in get_messages(response.wsgi_request)]
-        self.assertIn(views.TICKET_DELETED, messages)
+        self.assertIn(expected_message, messages)
 
         response = self.client.get(reverse("tickets"))
         ticket_list = response.context["ticket_list"]
         self.assertEqual(len(ticket_list), 0)
 
-        log_entry = CustomStatusLog.objects.get(msg=views.TICKET_DELETED)
+        log_entry = CustomStatusLog.objects.get(msg=expected_message)
         self.assertEqual(log_entry.level, logging.INFO)
 
     def login_helper(self):
