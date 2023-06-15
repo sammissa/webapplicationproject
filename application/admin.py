@@ -41,8 +41,8 @@ class TicketAdmin(admin.ModelAdmin):
     add_form = TicketCreationForm
     form = TicketChangeForm
     list_display = ('title', 'priority', 'status', 'reporter')
-    list_filter = ('priority', 'status')
-    search_fields = ('title', 'reporter__name')
+    list_filter = ('priority', 'status', 'reporter')
+    search_fields = ('title', 'reporter__first_name', 'reporter__last_name', 'reporter__username')
 
     def get_form(self, request, obj=None, **kwargs):
         defaults = {}
