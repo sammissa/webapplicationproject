@@ -7,10 +7,10 @@ on:
   pull_request:
     branches: [ main ]
 
-jobs:
-  env:
-    SECRET_KEY: ${{ secrets.SECRET_KEY }}
+env:
+  SECRET_KEY: ${{ secrets.SECRET_KEY }}
 
+jobs:
   build:
     name: Build
     runs-on: ubuntu-latest
