@@ -12,7 +12,7 @@ env:
 
 jobs:
   build:
-    name: Build
+    name: Build and Test
     runs-on: ubuntu-latest
     strategy:
       max-parallel: 4
@@ -33,29 +33,21 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run database migrations
-        run: python manage.py migrate
+      - name: Apply Migrations and Collect Static Files
+        run: |
+          python manage.py migrate
+          python manage.py collectstatic --noinput
 
-      - name: Collect static files
-        run: python manage.py collectstatic --noinput
-        
-      - name: Run Tests with Coverage
-        run: coverage run --source='.' manage.py test
-
-      - name: Generate HTML Coverage Report
-        run: coverage html
+      - name: Run Tests with Coverage and Generate Report
+        run: |
+          coverage run --source='.' manage.py test
+          coverage html
 
       - name: Upload Test Results
         uses: actions/upload-artifact@v3
         with:
           name: Test Results
           path: htmlcov
-
-      - name: Lint with Ruff
-        run: |
-          pip install ruff
-          ruff --format=github --target-version=py37 .
-        continue-on-error: true
 
   deploy:
     name: Deploy
@@ -81,8 +73,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
-      - name: Run database migrations
-        run: python manage.py migrate
-
-      - name: Collect static files
-        run: python manage.py collectstatic --noinput
+      - name: Apply Migrations and Collect Static Files
+        run: |
+          python manage.py migrate
+          python manage.py collectstatic --noinput
