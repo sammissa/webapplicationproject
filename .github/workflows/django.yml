@@ -8,10 +8,11 @@ on:
     branches: [ main ]
 
 jobs:
-  test:
-    name: Test
-    env: 
-      SECRET_KEY: ${{ secrets.SECRET_KEY }}
+  env:
+    SECRET_KEY: ${{ secrets.SECRET_KEY }}
+
+  build:
+    name: Build
     runs-on: ubuntu-latest
     strategy:
       max-parallel: 4
@@ -50,9 +51,15 @@ jobs:
           name: Test Results
           path: htmlcov
 
-  build:
-    name: Build
-    needs: test
+      - name: Lint with Ruff
+        run: |
+          pip install ruff
+          ruff --format=github --target-version=py37 .
+        continue-on-error: true
+
+  deploy:
+    name: Deploy
+    needs: build
     environment: fierce-refuge-23993
     runs-on: ubuntu-latest
     strategy:
