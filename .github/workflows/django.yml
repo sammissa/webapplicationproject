@@ -12,6 +12,9 @@ jobs:
     name: Test
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
       - name: Build
         uses: ./.github/workflows/build.yml
 
@@ -32,5 +35,8 @@ jobs:
     needs: test
     environment: fierce-refuge-23993
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
       - name: Build
         uses: ./.github/workflows/build.yml
