@@ -10,9 +10,10 @@ on:
 jobs:
   test:
     name: Test
-    uses: ./.github/workflows/build.yml
-
     steps:
+      - name: Build
+        uses: ./.github/workflows/build.yml
+
       - name: Run Tests with Coverage and Generate Report
         run: |
           coverage run --source='.' manage.py test
@@ -28,4 +29,6 @@ jobs:
     name: Deploy
     needs: test
     environment: fierce-refuge-23993
-    uses: ./.github/workflows/build.yml
+    steps:
+      - name: Build
+        uses: ./.github/workflows/build.yml
