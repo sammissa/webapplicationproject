@@ -10,7 +10,7 @@ on:
 jobs:
   test:
     name: Test
-    uses: .github/workflows/build.yml@main
+    uses: sammissa/webapplication/project/.github/workflows/build.yml@main
 
     steps:
       - name: Run Tests with Coverage and Generate Report
