@@ -10,6 +10,8 @@ name: Reset Database
 
 on:
   workflow_dispatch:
+    branches:
+      - main
 
 jobs:
   reset:
