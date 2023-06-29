@@ -3,8 +3,8 @@ References:
     TicketListView based on 'HomeListView', create_ticket_request and set_on_call_request based on 'log_message'
     in 'use the database through the models' section of Django tutorial:
 
-    Visual Studio Code (no date) [online] Python and Django tutorial in Visual Studio Code. Available at:
-    https://code.visualstudio.com/docs/python/tutorial-django (Accessed: 13 April 2022).
+    Visual Studio Code (no date) [online] Python and Django tutorial in Visual Studio Code.
+    Available at: https://code.visualstudio.com/docs/python/tutorial-django (Accessed: 13 April 2022).
 
     TicketDeleteView based on 'DeleteView' in Django documentation:
 
@@ -14,13 +14,17 @@ References:
 
     register_request and login_request based on 'add register/login functions to views' sections of:
 
-    Ordinary Coders (2020) [online] A Guide to User Registration, Login, and Logout in Django. Available at:
-    https://ordinarycoders.com/blog/article/django-user-register-login-logout (Accessed: 13 April 2022).
+    Ordinary Coders (2020) [online] A Guide to User Registration, Login, and Logout in Django.
+    Available at: https://ordinarycoders.com/blog/article/django-user-register-login-logout (Accessed: 13 April 2022).
 
     edit_ticket_request based on Stack overflow comment:
 
     Roseman, D. (2018) [online] Django, how to include pre-existing data in update form view, Stack Overflow.
     Available at: https://stackoverflow.com/a/52494854 (Accessed: 19 April 2022).
+
+    logger use based on django-db-logger usage found at:
+    zhangshine (2022) [online] ‘django-db-logger: Django logging in database’.
+    Available at: https://github.com/CiCiUi/django-db-logger (Accessed: 27 June 2023).
 """
 import logging
 

@@ -1,3 +1,15 @@
+# References:
+# - Building python package based on 'Python Starter Workflow' found at:
+#   GitHub (no date) [online] Building and testing Python.
+#   Available at: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python (Accessed: 27 June 2023).
+#
+# - Coverage steps based on 'Integration with coverage.py' found at:
+#   Django (no date) [online] Django: Advanced testing topics.
+#   Available at: https://docs.djangoproject.com/en/4.2/topics/testing/advanced/ (Accessed: 27 June 2023).
+#
+# - Upload test report steps based on 'Publishing code coverage result as a workflow artifact' section found at:
+#   Edreira, D. (2021) [online] Create a GitHub Actions CI pipeline for a Python Package.
+#   Available at: https://dedreira.medium.com/create-a-github-actions-ci-pipeline-for-a-python-package-4c4c02dc5f2e (Accessed: 27 June 2023).
 name: Django CI/CD
 
 on:

@@ -1,24 +1,30 @@
 """
 References:
-    TicketCreationForm based on 'LogMessageForm' in 'use the database through the models' section of Django tutorial:
+    EngineerUserCreationForm class is based on 'create the register form' found at:
 
-    Visual Studio Code (no date) [online] Python and Django tutorial in Visual Studio Code. Available at:
-    https://code.visualstudio.com/docs/python/tutorial-django (Accessed: 13 April 2022).
+    Ordinary Coders (2020) [online] A Guide to User Registration, Login, and Logout in Django.
+    Available at: https://ordinarycoders.com/blog/article/django-user-register-login-logout (Accessed: 13 April 2022).
 
-    EngineerUserCreationForm based on 'create the register form' found at:
+    EngineerUserCreationForm __init__ is based on code in 'fundamentals' section of django crispy forms documentation:
 
-    Ordinary Coders (2020) [online] A Guide to User Registration, Login, and Logout in Django. Available at:
-    https://ordinarycoders.com/blog/article/django-user-register-login-logout (Accessed: 13 April 2022).
+    Araujo, M. (2021) [online] django-crispy-forms Documentation.
+    Available at: https://readthedocs.org/projects/django-crispy-forms/downloads/pdf/latest/ (Accessed: 13 April 2022).
 
-    EngineerUserCreationForm __init__ based on code in 'fundamentals' section of django crispy forms documentation:
+    EngineerUserChangeForm class is based on 'CustomUserChangeForm' found at:
 
-    Araujo, M. (2021) [online] django-crispy-forms Documentation. Available at:
-    https://readthedocs.org/projects/django-crispy-forms/downloads/pdf/latest/ (Accessed: 13 April 2022).
+    Learn Django (2022) [online] Django Best Practices: Custom User Model.
+    Available at: https://learndjango.com/tutorials/django-custom-user-model (Accessed: 20 June 2023).
 
-    OnCallChangeForm based on the comment by Chad on Stack Overflow:
+    TicketCreationForm class is based on 'LogMessageForm' in 'use the database through the models' section of Django
+    tutorial found at:
 
-    Chad (2021) [online] ‘Django dropdown menu/form based on model entries’, Stack Overflow. Available at:
-    https://stackoverflow.com/questions/66655712/django-dropdown-menu-form-based-on-model-entries
+    Visual Studio Code (no date) [online] Python and Django tutorial in Visual Studio Code.
+    Available at: https://code.visualstudio.com/docs/python/tutorial-django (Accessed: 13 April 2022).
+
+    OnCallChangeForm class is based on the comment by Chad on Stack Overflow:
+
+    Chad (2021) [online] ‘Django dropdown menu/form based on model entries’, Stack Overflow.
+    Available at: https://stackoverflow.com/questions/66655712/django-dropdown-menu-form-based-on-model-entries
     (Accessed: 13 April 2022).
 """
 import logging

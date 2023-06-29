@@ -1,3 +1,11 @@
+# References:
+# - Insert Data into tables based on 'loaddata' command found at:
+#   Django (no date) [online] Django: Manage.py.
+#   Available at: https://docs.djangoproject.com/en/4.2/ref/django-admin/ (Accessed: 27 June 2023).
+#
+# - Create Superuser based on 'Using manage.py shell' answer found at:
+#   Yarmash, E. (2016) [Online] ‘Answer to “How to create a Django superuser if it doesn’t exist non-interactively?”’, Stack Overflow.
+#   Available at: https://stackoverflow.com/a/39745576 (Accessed: 27 June 2023).
 name: Reset Database
 
 on:

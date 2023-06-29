@@ -3,18 +3,18 @@ References:
     TicketCreationFormTestCase, EngineerUserCreationFormTestCase, and OnCallChangeFormTestCase based on tests in 'Forms'
     section and ViewsTestCase based on 'Views' section of:
 
-    MDN Contributors (2022) [online] Django Tutorial Part 10. Available at:
-    https://developer.mozilla.org/en-US/docs/Learn/Server-side/Django/Testing (Accessed: 14 April 2022).
+    MDN Contributors (2022) [online] Django Tutorial Part 10.
+    Available at: https://developer.mozilla.org/en-US/docs/Learn/Server-side/Django/Testing (Accessed: 14 April 2022).
 
     EngineerUserTestCase and TicketTestCase were based on the following:
 
-    Django (no date) [online] Writing and running tests | Django documentation. Available at:
-    https://docs.djangoproject.com/en/4.0/topics/testing/overview/ (Accessed: 13 April 2022).
+    Django (no date) [online] Writing and running tests | Django documentation.
+    Available at: https://docs.djangoproject.com/en/4.0/topics/testing/overview/ (Accessed: 13 April 2022).
 
     Message response testing based on Stack overflow answer:
 
-    Moppag (2017) [online] python - How can I unit test django messages?, Stack Overflow. Available at:
-    https://stackoverflow.com/a/46865530 (Accessed: 21 April 2022).
+    Moppag (2017) [online] python - How can I unit test django messages?, Stack Overflow.
+    Available at: https://stackoverflow.com/a/46865530 (Accessed: 21 April 2022).
 """
 import logging
 

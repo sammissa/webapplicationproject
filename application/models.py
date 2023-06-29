@@ -1,9 +1,14 @@
 """
 References:
-    EngineerUser and Ticket model were based on the code in the 'define models' section of Django tutorial:
+    EngineerUser class is based on 'CustomUser' found at:
 
-    Visual Studio Code (no date) [online] Python and Django tutorial in Visual Studio Code. Available at:
-    https://code.visualstudio.com/docs/python/tutorial-django (Accessed: 13 April 2022).
+    Learn Django (2022) [online] Django Best Practices: Custom User Model.
+    Available at: https://learndjango.com/tutorials/django-custom-user-model (Accessed: 20 June 2023).
+
+    Ticket class is based on the code in the 'define models' section of Django tutorial:
+
+    Visual Studio Code (no date) [online] Python and Django tutorial in Visual Studio Code.
+    Available at: https://code.visualstudio.com/docs/python/tutorial-django (Accessed: 13 April 2022).
 """
 from django.contrib.auth.models import AbstractUser
 from django.db import models

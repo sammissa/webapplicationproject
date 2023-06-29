@@ -3,13 +3,13 @@ References:
     urlpatterns was based on 'create a django app' section, ticket_list_view and user_ticket_list_view were based on
     'use the database through the models' section:
 
-    Visual Studio Code (no date) [online] Python and Django tutorial in Visual Studio Code. Available at:
-    https://code.visualstudio.com/docs/python/tutorial-django (Accessed: 13 April 2022).
+    Visual Studio Code (no date) [online] Python and Django tutorial in Visual Studio Code.
+    Available at: https://code.visualstudio.com/docs/python/tutorial-django (Accessed: 13 April 2022).
 
     edit_ticket_request url based on section 1 in:
 
-    Dev 2 Qa (2019) [online] ‘How To Pass Parameters To View Via Url In Django’. Available at:
-    https://www.dev2qa.com/how-to-pass-parameters-to-view-via-url-in-django/ (Accessed: 19 April 2022).
+    Dev 2 Qa (2019) [online] ‘How To Pass Parameters To View Via Url In Django’.
+    Available at: https://www.dev2qa.com/how-to-pass-parameters-to-view-via-url-in-django/ (Accessed: 19 April 2022).
 """
 from django.urls import path
 

@@ -1,3 +1,25 @@
+"""
+References:
+    EngineerUserAdmin class is based on 'CustomUserAdmin' found at:
+
+    Learn Django (2022) [online] Django Best Practices: Custom User Model.
+    Available at: https://learndjango.com/tutorials/django-custom-user-model (Accessed: 20 June 2023).
+
+    EngineerUserAdmin save_model is based on 'Ordering Logic' found at:
+
+    Wiles, F. (2018) [online] Keeping Django Models Ordered.
+    Available at: https://www.revsys.com/tidbits/keeping-django-model-objects-ordered/ (Accessed: 27 June 2023).
+
+    TicketAdmin class is based on 'PersonAdmin' found at:
+
+    Trudeau, C. (no date) [online] Customize the Django Admin With Python – Real Python.
+    Available at: https://realpython.com/customize-django-admin-python/ (Accessed: 20 June 2023).
+
+    TicketAdmin get_form is based on Django UserAdmin 'get_form' found at:
+
+    Django (2023) [online] Django UserAdmin get form method.
+    Available at: https://github.com/django/django/blob/main/django/contrib/auth/admin.py#L90 (Accessed: 20 June 2023).
+"""
 import logging
 
 from django.contrib import admin
