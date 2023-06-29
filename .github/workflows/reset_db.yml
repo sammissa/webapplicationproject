@@ -10,11 +10,11 @@ name: Reset Database
 
 on:
   workflow_dispatch:
-    branches:
-      - main
 
 jobs:
   reset:
+    name: Reset Database
+    if: ${{ github.ref == 'refs/heads/main' }}
     environment: fierce-refuge-23993
     env:
       SECRET_KEY: ${{ secrets.SECRET_KEY }}
