@@ -13,7 +13,11 @@
 #
 # - Deploy push event conditional is based on 'Example usage of the github context' found at:
 #   Github (no date) [online] Contexts, GitHub Docs.
-#   Available at: https://ghdocs-prod.azurewebsites.net/en/actions/learn-github-actions/contexts (Accessed: 29 June 2023).
+#   Available at: https://docs.github.com/en/actions/learn-github-actions/contexts#example-usage-of-the-github-context(Accessed: 29 June 2023).
+#
+# - Deploy main branch conditional is based on 'Determining when to use contexts' found at:
+#   Github (no date) [online] Contexts, GitHub Docs.
+#   Available at: https://docs.github.com/en/actions/learn-github-actions/contexts#determining-when-to-use-contexts (Accessed: 29 June 2023).
 name: Django CI/CD
 
 on:
@@ -71,7 +75,7 @@ jobs:
   deploy:
     name: Deploy
     needs: test
-    if: ${{ github.event_name == 'push' }}
+    if: ${{ github.event_name == 'push' }} && ${{ github.ref == 'refs/heads/main' }}
     environment: fierce-refuge-23993
 
     runs-on: ubuntu-latest
