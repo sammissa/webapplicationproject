@@ -10,6 +10,10 @@
 # - Upload test report steps based on 'Publishing code coverage result as a workflow artifact' section found at:
 #   Edreira, D. (2021) [online] Create a GitHub Actions CI pipeline for a Python Package.
 #   Available at: https://dedreira.medium.com/create-a-github-actions-ci-pipeline-for-a-python-package-4c4c02dc5f2e (Accessed: 27 June 2023).
+#
+# - Deploy push event conditional is based on 'Example usage of the github context' found at:
+#   Github (no date) [online] Contexts, GitHub Docs.
+#   Available at: https://ghdocs-prod.azurewebsites.net/en/actions/learn-github-actions/contexts (Accessed: 29 June 2023).
 name: Django CI/CD
 
 on:
@@ -67,6 +71,7 @@ jobs:
   deploy:
     name: Deploy
     needs: test
+    if: ${{ github.event_name == 'push' }}
     environment: fierce-refuge-23993
 
     runs-on: ubuntu-latest
