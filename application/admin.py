@@ -20,15 +20,11 @@ References:
     Django (2023) [online] Django UserAdmin get form method.
     Available at: https://github.com/django/django/blob/main/django/contrib/auth/admin.py#L90 (Accessed: 20 June 2023).
 """
-import logging
-
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 
 from application.forms import EngineerUserCreationForm, EngineerUserChangeForm, TicketCreationForm, TicketChangeForm
 from application.models import EngineerUser, Ticket
-
-logger = logging.getLogger()
 
 
 @admin.register(EngineerUser)
