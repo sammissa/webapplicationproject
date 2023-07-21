@@ -75,7 +75,7 @@ jobs:
   deploy:
     name: Deploy
     needs: test
-    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+    if: ${{ (github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main' }}
     environment: fierce-refuge-23993
 
     runs-on: ubuntu-latest
