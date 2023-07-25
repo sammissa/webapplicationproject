@@ -1,0 +1,14 @@
+on: [workflow_dispatch]
+
+jobs:
+  zap_scan:
+    runs-on: ubuntu-latest
+    name: Scan the webapplication
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: ZAP Scan
+        uses: zaproxy/action-baseline@v0.8.2
+        with:
+          target: 'https://fierce-refuge-23993.herokuapp.com/'
