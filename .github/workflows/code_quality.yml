@@ -2,6 +2,7 @@
 # - Qodana yml file based on 'basic configuration' found at:
 #   JetBrains (2023) [online] GitHub Actions | Qodana, Qodana Help.
 #   Available at: https://www.jetbrains.com/help/qodana/github.html (Accessed: 27 June 2023).
+# Disclaimer: Disabled in private repository
 name: Qodana
 on:
   workflow_dispatch:

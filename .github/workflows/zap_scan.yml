@@ -1,9 +1,16 @@
+# References:
+# - OWASP Zap Scan yml file based on 'Example usage' found at:
+#   Zaproxy (2023) OWASP ZAP Baseline Scan · Actions · GitHub Marketplace.
+#   Available at: https://github.com/marketplace/actions/owasp-zap-baseline-scan (Accessed: 25 July 2023).
+# Disclaimer: Disabled in private repository
+name: OWASP Zap Scan
+
 on: [workflow_dispatch]
 
 jobs:
   zap_scan:
     runs-on: ubuntu-latest
-    name: Scan the webapplication
+    name: Scan the web application
     steps:
       - name: Checkout
         uses: actions/checkout@v3
