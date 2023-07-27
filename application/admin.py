@@ -29,6 +29,19 @@ from application.models import EngineerUser, Ticket
 
 @admin.register(EngineerUser)
 class EngineerUserAdmin(UserAdmin):
+    """
+    Admin panel configuration for EngineerUser model.
+
+    Attributes:
+        add_form: Form to add a new EngineerUser instance.
+        form: Form to change an existing EngineerUser instance.
+        model: The model associated with this admin configuration (EngineerUser).
+        list_display (tuple): Fields to display in the list view.
+        list_filter (tuple): Fields to use for filtering in the list view.
+        fieldsets (tuple): Fieldsets for grouping fields in the change view.
+        add_fieldsets (tuple): Fieldsets for grouping fields in the add view.
+    """
+
     add_form = EngineerUserCreationForm
     form = EngineerUserChangeForm
     model = EngineerUser
@@ -47,15 +60,39 @@ class EngineerUserAdmin(UserAdmin):
     )
 
     def save_model(self, request, obj, form, change):
+        """
+        Save an EngineerUser instance in the admin panel.
+
+        If the 'is_on_call' status has changed to True, update other users to set it to False.
+
+        Parameters:
+            request: The HTTP request object.
+            obj: The EngineerUser instance being saved.
+            form: The form used for changing the EngineerUser instance.
+            change: A boolean indicating if this is a change to an existing instance.
+
+        Returns:
+            None
+        """
         super().save_model(request, obj, form, change)
 
-        # If the is_on_call status has changed to True, update other users
         if change and form.instance.is_on_call and not form.initial['is_on_call']:
             EngineerUser.objects.exclude(pk=obj.pk).update(is_on_call=False)
 
 
 @admin.register(Ticket)
 class TicketAdmin(admin.ModelAdmin):
+    """
+    Admin panel configuration for Ticket model.
+
+    Attributes:
+        add_form: Form to add a new Ticket instance.
+        form: Form to change an existing Ticket instance.
+        list_display (tuple): Fields to display in the list view.
+        list_filter (tuple): Fields to use for filtering in the list view.
+        search_fields (tuple): Fields to use for searching in the list view.
+    """
+
     add_form = TicketCreationForm
     form = TicketChangeForm
     list_display = ('title', 'priority', 'status', 'reporter')
@@ -63,6 +100,16 @@ class TicketAdmin(admin.ModelAdmin):
     search_fields = ('title', 'reporter__first_name', 'reporter__last_name', 'reporter__username')
 
     def get_form(self, request, obj=None, **kwargs):
+        """
+        Get the form for adding or changing a Ticket instance.
+
+        Parameters:
+            request: The HTTP request object.
+            obj: The Ticket instance being changed (or None for adding).
+
+        Returns:
+            form: The appropriate form for adding or changing a Ticket instance.
+        """
         defaults = {}
         if obj is None:
             defaults["form"] = self.add_form
@@ -70,6 +117,20 @@ class TicketAdmin(admin.ModelAdmin):
         return super().get_form(request, obj, **defaults)
 
     def save_model(self, request, obj, form, change):
+        """
+        Save a Ticket instance in the admin panel.
+
+        If this is a new instance, set the reporter to the current user.
+
+        Parameters:
+            request: The HTTP request object.
+            obj: The Ticket instance being saved.
+            form: The form used for changing the Ticket instance.
+            change: A boolean indicating if this is a change to an existing instance.
+
+        Returns:
+            None
+        """
         if not change:
             obj.reporter = request.user
 

@@ -14,7 +14,23 @@ db_default_formatter = logging.Formatter()
 
 
 class CustomDatabaseLogHandler(DatabaseLogHandler):
+    """
+    Custom log handler for storing log records in the database.
+
+    This log handler extends the base DatabaseLogHandler to save log records into the
+    CustomStatusLog model in the database. It overrides the `emit` method to handle log records
+    and create corresponding CustomStatusLog objects.
+
+    """
+
     def emit(self, record):
+        """
+        Emit a log record and save it in the database.
+
+        Parameters:
+            record (LogRecord): The log record to be saved.
+
+        """
         from .models import CustomStatusLog
         
         trace = None

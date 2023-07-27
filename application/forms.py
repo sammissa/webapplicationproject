@@ -46,20 +46,31 @@ logger = logging.getLogger()
 
 
 class EngineerUserCreationForm(UserCreationForm):
+    """
+    A custom user creation form for EngineerUser model.
+
+    Attributes:
+        first_name (forms.CharField): User's first name with 2 to 50 characters.
+        last_name (forms.CharField): User's last name with 2 to 50 characters.
+    """
+
     first_name = forms.CharField(
-        validators=[
-            MinLengthValidator(2),
-            MaxLengthValidator(50)
-        ]
+        validators=[MinLengthValidator(2), MaxLengthValidator(50)]
     )
     last_name = forms.CharField(
-        validators=[
-            MinLengthValidator(2),
-            MaxLengthValidator(50)
-        ]
+        validators=[MinLengthValidator(2), MaxLengthValidator(50)]
     )
 
     def __init__(self, *args, **kwargs):
+        """
+        Constructor method for EngineerUserCreationForm.
+
+        Sets up the form with 'POST' method and 'Register' submit button.
+
+        Parameters:
+            *args: Variable-length arguments passed to the constructor.
+            **kwargs: Arbitrary keyword arguments passed to the constructor.
+        """
         super().__init__(*args, **kwargs)
 
         self.helper = FormHelper()
@@ -67,10 +78,27 @@ class EngineerUserCreationForm(UserCreationForm):
         self.helper.add_input(Submit('submit', 'Register'))
 
     class Meta:
+        """
+        Meta class for EngineerUserCreationForm.
+
+        Specifies the model and fields associated with this form.
+
+        Attributes:
+            model (EngineerUser): The model class to which this form is associated.
+            fields (tuple): A tuple containing the fields to be included in the form.
+        """
         model = EngineerUser
         fields = ("first_name", "last_name", "username", "email", "password1", "password2")
 
     def clean(self):
+        """
+        Custom clean method for EngineerUserCreationForm.
+
+        Performs additional validation and cleaning of form fields.
+
+        Returns:
+            dict: A dictionary containing the cleaned form data.
+        """
         cleaned_data = super().clean()
         cleaned_first_name = clean_field(self, cleaned_data, "first_name")
         cleaned_last_name = clean_field(self, cleaned_data, "last_name")
@@ -81,17 +109,23 @@ class EngineerUserCreationForm(UserCreationForm):
 
 
 class EngineerUserChangeForm(UserChangeForm):
+    """
+    A custom user change form for EngineerUser model.
+
+    Attributes:
+        first_name (forms.CharField): User's first name with 2 to 50 characters.
+        last_name (forms.CharField): User's last name with 2 to 50 characters.
+
+    Meta:
+        model (EngineerUser): The model associated with this form.
+        fields: '__all__' (tuple): All fields of the EngineerUser model are included in the form.
+    """
+
     first_name = forms.CharField(
-        validators=[
-            MinLengthValidator(2),
-            MaxLengthValidator(50)
-        ]
+        validators=[MinLengthValidator(2), MaxLengthValidator(50)]
     )
     last_name = forms.CharField(
-        validators=[
-            MinLengthValidator(2),
-            MaxLengthValidator(50)
-        ]
+        validators=[MinLengthValidator(2), MaxLengthValidator(50)]
     )
 
     class Meta:
@@ -99,6 +133,14 @@ class EngineerUserChangeForm(UserChangeForm):
         fields = '__all__'
 
     def clean(self):
+        """
+        Custom clean method for EngineerUserChangeForm.
+
+        Performs additional validation and cleaning of form fields.
+
+        Returns:
+            dict: A dictionary containing the cleaned form data.
+        """
         cleaned_data = super().clean()
         cleaned_first_name = clean_field(self, cleaned_data, "first_name")
         cleaned_last_name = clean_field(self, cleaned_data, "last_name")
@@ -109,15 +151,40 @@ class EngineerUserChangeForm(UserChangeForm):
 
 
 class TicketCreationForm(forms.ModelForm):
+    """
+    A form to create a Ticket.
+
+    Meta:
+        model (Ticket): The model associated with this form.
+        fields (tuple): The fields to be included in the form.
+    """
+
     class Meta:
         model = Ticket
         fields = ("title", "priority", "description", "status")
 
     def __init__(self, *args, **kwargs):
+        """
+        Constructor method for TicketCreationForm.
+
+        Sets the 'user' attribute and calls the parent constructor.
+
+        Parameters:
+            *args: Variable-length arguments passed to the constructor.
+            **kwargs: Arbitrary keyword arguments passed to the constructor.
+        """
         self.user = kwargs.pop('user', None)
         super(TicketCreationForm, self).__init__(*args, **kwargs)
 
     def clean(self):
+        """
+        Custom clean method for TicketCreationForm.
+
+        Performs additional validation and cleaning of form fields.
+
+        Returns:
+            dict: A dictionary containing the cleaned form data.
+        """
         cleaned_data = super().clean()
         cleaned_title = clean_field(self, cleaned_data, "title", self.user)
         cleaned_description = clean_field(self, cleaned_data, "description", self.user)
@@ -127,6 +194,17 @@ class TicketCreationForm(forms.ModelForm):
         return cleaned_data
 
     def save(self, commit=True):
+        """
+        Save method for TicketCreationForm.
+
+        Creates a new Ticket instance, sets some attributes, and saves it.
+
+        Parameters:
+            commit (bool, optional): If True, the ticket is saved to the database. Defaults to True.
+
+        Returns:
+            Ticket: The newly created Ticket instance.
+        """
         ticket = super().save(commit=False)
         ticket.created = timezone.now()
         ticket.reporter = self.user
@@ -138,6 +216,18 @@ class TicketCreationForm(forms.ModelForm):
 
 
 class TicketChangeForm(forms.ModelForm):
+    """
+    A form to change a Ticket.
+
+    Attributes:
+        title (forms.CharField): Read-only field for the ticket's title.
+        created (forms.DateTimeField): Read-only field for the ticket's creation date.
+
+    Meta:
+        model (Ticket): The model associated with this form.
+        fields (tuple): The fields to be included in the form.
+    """
+
     title = forms.CharField(disabled=True)
     created = forms.DateTimeField(disabled=True)
 
@@ -146,10 +236,27 @@ class TicketChangeForm(forms.ModelForm):
         fields = ("title", "created", "priority", "description", "status")
 
     def __init__(self, *args, **kwargs):
+        """
+        Constructor method for TicketChangeForm.
+
+        Sets the 'user' attribute and calls the parent constructor.
+
+        Parameters:
+            *args: Variable-length arguments passed to the constructor.
+            **kwargs: Arbitrary keyword arguments passed to the constructor.
+        """
         self.user = kwargs.pop('user', None)
         super(TicketChangeForm, self).__init__(*args, **kwargs)
 
     def clean(self):
+        """
+        Custom clean method for TicketChangeForm.
+
+        Performs additional validation and cleaning of form fields.
+
+        Returns:
+            dict: A dictionary containing the cleaned form data.
+        """
         cleaned_data = super().clean()
         cleaned_description = clean_field(self, cleaned_data, "description", self.user)
         cleaned_data["description"] = cleaned_description
@@ -158,11 +265,33 @@ class TicketChangeForm(forms.ModelForm):
 
 
 class OnCallChangeForm(forms.Form):
+    """
+    A form to change the engineer on-call.
+
+    Attributes:
+        engineer (forms.ModelChoiceField): A ModelChoiceField to select an engineer.
+    """
+
     engineer = forms.ModelChoiceField(
         label="Engineer Choices", queryset=EngineerUser.objects.all(), required=True)
 
 
 def clean_field(self, cleaned_data, field_name, user=None):
+    """
+    Custom clean_field function.
+
+    Validates the 'field_data' for potential SQL injection and Cross-Site Scripting (XSS) attacks.
+    Escapes the 'field_data' to mitigate XSS risks.
+
+    Parameters:
+        :param self: instance of form.
+        :param cleaned_data: A dictionary containing the cleaned form data.
+        :param field_name: The name of the field to be validated.
+        :param user: The engineer user associated with the data. Defaults to None.
+
+    Returns:
+        str: The cleaned and escaped field data.
+    """
     field_data = cleaned_data.get(field_name)
 
     if field_data:
@@ -177,6 +306,16 @@ def clean_field(self, cleaned_data, field_name, user=None):
 
 
 def sql_injection_check(input_string, user):
+    """
+    Checks for SQL injection in the input_string.
+
+    Parameters:
+        input_string (str): The input data to check for SQL injection.
+        user (EngineerUser, optional): The engineer user associated with the data. Defaults to None.
+
+    Returns:
+        bool: True if SQL injection is detected, False otherwise.
+    """
     sql_keywords = ["DROP", "DELETE", "UPDATE", "INSERT", "SELECT"]
 
     for keyword in sql_keywords:
@@ -187,6 +326,16 @@ def sql_injection_check(input_string, user):
 
 
 def cross_site_scripting_check(input_string, user):
+    """
+    Checks for Cross-Site Scripting (XSS) in the input_string.
+
+    Parameters:
+        input_string (str): The input data to check for XSS.
+        user (EngineerUser, optional): The engineer user associated with the data. Defaults to None.
+
+    Returns:
+        bool: True if XSS is detected, False otherwise.
+    """
     if '<script>' in input_string:
         logger.warning(XSS_MSG, extra={'username': get_username(user)})
         return True
@@ -194,6 +343,15 @@ def cross_site_scripting_check(input_string, user):
 
 
 def get_username(user):
+    """
+    Get the username from the user object.
+
+    Parameters:
+        user (EngineerUser, optional): The engineer user object. Defaults to None.
+
+    Returns:
+        str: The username of the user if 'user' is not None, otherwise, returns "Anonymous".
+    """
     if user:
         return user.username
     return "Anonymous"
