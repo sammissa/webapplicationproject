@@ -53,16 +53,37 @@ logger = logging.getLogger()
 
 
 class TicketListView(LoginRequiredMixin, ListView):
+    """
+    View for listing tickets.
+
+    Attributes:
+        login_url (str): The URL for login redirection.
+        model: The model associated with this view (Ticket).
+        context_object_name (str): The context variable name to use in the template.
+    """
+
     login_url = "login"
     model = Ticket
     context_object_name = "ticket_list"
 
     def get_context_data(self, **kwargs):
+        """
+        Get the context data for the template.
+
+        Returns:
+            dict: The context data for the template.
+        """
         context = super(TicketListView, self).get_context_data(**kwargs)
         context["on_call"] = EngineerUser.objects.filter(is_on_call=True)
         return context
 
     def get_queryset(self):
+        """
+        Get the queryset to display the list of tickets.
+
+        Returns:
+            QuerySet: The queryset to display the list of tickets.
+        """
         if self.request.path == "/user_tickets/":
             user = get_user(self.request)
             return Ticket.objects.filter(reporter=user)
@@ -70,11 +91,26 @@ class TicketListView(LoginRequiredMixin, ListView):
 
 
 class TicketDeleteView(PermissionRequiredMixin, DeleteView):
+    """
+    View for deleting a ticket. Access to this view requires the 'user.is_superuser' permission.
+
+    Attributes:
+        permission_required (str): The required permission for accessing this view.
+        model: The model associated with this view (Ticket).
+        context_object_name (str): The context variable name to use in the template.
+    """
+
     permission_required = "user.is_superuser"
     model = Ticket
     context_object_name = "delete_ticket_form"
 
     def get_success_url(self):
+        """
+        Get the URL to redirect after successful deletion.
+
+        Returns:
+            str: The URL to redirect after successful deletion.
+        """
         ticket = self.get_object()
         message = f"Ticket deleted: [{ticket.title}]."
         messages.info(self.request, message)
@@ -83,10 +119,32 @@ class TicketDeleteView(PermissionRequiredMixin, DeleteView):
 
 
 def home_request(request):
+    """
+    Render the home page template.
+
+    Parameters:
+        request: The HTTP request object.
+
+    Returns:
+        HttpResponse: The rendered home page template.
+    """
     return render(request=request, template_name="application/home.html")
 
 
 def register_request(request):
+    """
+    Handle user registration.
+
+    If the request method is POST, attempt to register the user with the provided form data.
+    If the registration is successful, log in the user and redirect to the 'tickets' page.
+    If the registration fails, display an error message.
+
+    Parameters:
+        request: The HTTP request object.
+
+    Returns:
+        HttpResponse: The rendered registration page template or a redirect response.
+    """
     form = EngineerUserCreationForm(request.POST or None)
     if request.method == "POST":
         form = EngineerUserCreationForm(request.POST)
@@ -102,6 +160,19 @@ def register_request(request):
 
 
 def login_request(request):
+    """
+    Handle user login.
+
+    If the request method is POST, attempt to authenticate the user with the provided form data.
+    If the user authentication is successful, log in the user and redirect to the 'tickets' page.
+    If the authentication fails, display an error message.
+
+    Parameters:
+        request: The HTTP request object.
+
+    Returns:
+        HttpResponse: The rendered login page template or a redirect response.
+    """
     form = AuthenticationForm(request, data=request.POST or None)
     if request.method == "POST":
         if form.is_valid():
@@ -120,6 +191,17 @@ def login_request(request):
 
 @login_required(login_url="login")
 def logout_request(request):
+    """
+    Handle user logout.
+
+    Log out the authenticated user, display a success message, and redirect to the login page.
+
+    Parameters:
+        request: The HTTP request object.
+
+    Returns:
+        HttpResponse: A redirect response to the login page.
+    """
     logout(request)
     messages.info(request, LOGGED_OUT)
     logger.info(LOGGED_OUT, extra={'username': request.user.username})
@@ -128,6 +210,19 @@ def logout_request(request):
 
 @login_required(login_url="login")
 def create_ticket_request(request):
+    """
+    Handle ticket creation.
+
+    If the request method is POST, attempt to create a new ticket with the provided form data.
+    If the ticket creation is successful, display a success message and redirect to the 'tickets' page.
+    If the form data is invalid, display an error message.
+
+    Parameters:
+        request: The HTTP request object.
+
+    Returns:
+        HttpResponse: The rendered ticket creation form page template or a redirect response.
+    """
     form = TicketCreationForm(request.POST or None, user=request.user)
     if request.method == "POST":
         if form.is_valid():
@@ -143,6 +238,21 @@ def create_ticket_request(request):
 
 @login_required(login_url="login")
 def edit_ticket_request(request, pk):
+    """
+    Handle ticket editing.
+
+    If the provided ticket ID (pk) exists, retrieve the ticket instance and display the ticket edit form.
+    If the form data is valid and the ticket is successfully updated, display a success message
+    and redirect to the 'tickets' page.
+    If the ticket ID does not exist, display an error message and return to the ticket list page.
+
+    Parameters:
+        request: The HTTP request object.
+        pk (int): The primary key of the ticket to edit.
+
+    Returns:
+        HttpResponse: The rendered ticket edit form page template or a redirect response.
+    """
     try:
         instance = Ticket.objects.get(pk=pk)
     except Ticket.DoesNotExist:
@@ -165,6 +275,20 @@ def edit_ticket_request(request, pk):
 
 @login_required(login_url="login")
 def set_on_call_request(request):
+    """
+    Handle setting an engineer on call.
+
+    If the request method is POST, attempt to set an engineer on call based on the provided form data.
+    If the form data is valid and an engineer is successfully set on call, display a success message
+    and redirect to the 'tickets' page.
+    If the form data is invalid or no engineer is selected, keep the user on the 'set_on_call' form page.
+
+    Parameters:
+        request: The HTTP request object.
+
+    Returns:
+        HttpResponse: The rendered 'set_on_call' form page template or a redirect response.
+    """
     form = OnCallChangeForm(request.POST or None)
     if request.method == "POST":
         if form.is_valid():

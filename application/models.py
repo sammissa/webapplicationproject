@@ -16,6 +16,23 @@ from django.utils.translation import gettext_lazy as _
 
 
 class EngineerUser(AbstractUser):
+    """
+    Custom user model for engineers.
+
+    This model extends the Django AbstractUser model to include additional fields for
+    first_name, last_name, and an email address as a unique identifier. It also includes
+    a boolean field 'is_on_call' that states if the engineer is currently on call.
+
+    Attributes:
+        first_name (models.CharField): The first name of the engineer (max length: 50 characters).
+        last_name (models.CharField): The last name of the engineer (max length: 50 characters).
+        email (models.EmailField): The email address of the engineer (unique identifier).
+        is_on_call (models.BooleanField): Indicates if the engineer is currently on call (default: False).
+
+    REQUIRED_FIELDS (list of str): The list of required fields for creating an engineer user.
+        ["email", "first_name", "last_name"]
+    """
+
     first_name = models.CharField(max_length=50)
     last_name = models.CharField(max_length=50)
     email = models.EmailField(unique=True)
@@ -34,6 +51,21 @@ class EngineerUser(AbstractUser):
 
 
 class Ticket(models.Model):
+    """
+    Model representing a ticket.
+
+    This model represents a ticket with various fields such as title, creation date,
+    priority, description, status, and the reporter (an EngineerUser).
+
+    Attributes:
+        title (models.CharField): The title of the ticket (max length: 100 characters).
+        created (models.DateTimeField): The date and time the ticket was created.
+        priority (models.CharField): The priority of the ticket (default: Priority.LOW).
+        description (models.TextField): The description of the ticket (max length: 1000 characters).
+        status (models.CharField): The status of the ticket (default: Status.TD).
+        reporter (models.ForeignKey): The ForeignKey to the EngineerUser who reported the ticket.
+    """
+
     class Priority(models.TextChoices):
         LOW = 'L', _('Low')
         MED = 'M', _('Medium')

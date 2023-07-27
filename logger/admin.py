@@ -24,6 +24,14 @@ from .models import CustomStatusLog, CustomLogEntry
 
 @admin.register(CustomStatusLog)
 class CustomStatusLogAdmin(StatusLogAdmin):
+    """
+    Custom admin panel for managing CustomStatusLog objects.
+
+    This admin panel extends the base StatusLogAdmin and customizes the display and filtering
+    options for CustomStatusLog objects. It disables add, change, and delete permissions for this model.
+
+    """
+
     list_display_links = ('colored_msg', 'create_datetime_format',)
     list_display = ('create_datetime_format', 'username', 'colored_msg', 'traceback')
     list_filter = ('level', 'username')
@@ -41,6 +49,14 @@ class CustomStatusLogAdmin(StatusLogAdmin):
 
 @admin.register(CustomLogEntry)
 class LogEntryAdmin(admin.ModelAdmin):
+    """
+    Custom admin panel for managing CustomLogEntry objects.
+
+    This admin panel provides additional filtering and search options for CustomLogEntry objects.
+    It disables add, change, and delete permissions for this model.
+
+    """
+
     date_hierarchy = 'action_time'
     list_display = ('action_time', 'user', 'content_type', 'object_repr', 'action_flag')
     list_filter = ('action_flag', 'user', 'content_type')
